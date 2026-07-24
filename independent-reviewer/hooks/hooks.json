@@ -1,0 +1,14 @@
+ {
+    "hooks": {
+        "Stop":[
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "cd \"$CLAUDE_PROJECT_DIR\" && codex exec \"Review changes since last commit and write results to a file named planning/REVIEW_BY_HOOK_COMMAND.md relative to the repository root.\""
+                    }
+                ]
+            }
+        ]
+    }
+ } 
