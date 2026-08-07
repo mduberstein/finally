@@ -1,47 +1,43 @@
-"""Seed prices and per-ticker parameters for the market simulator."""
+import hashlib
+from dataclasses import dataclass
 
-# Realistic starting prices for the default watchlist (as of project creation)
-SEED_PRICES: dict[str, float] = {
-    "AAPL": 190.00,
-    "GOOGL": 175.00,
-    "MSFT": 420.00,
-    "AMZN": 185.00,
-    "TSLA": 250.00,
-    "NVDA": 800.00,
-    "META": 500.00,
-    "JPM": 195.00,
-    "V": 280.00,
-    "NFLX": 600.00,
+
+@dataclass(frozen=True, slots=True)
+class TickerProfile:
+    """Static characteristics of a simulated ticker."""
+
+    anchor: float
+    """Price the random walk is pulled back toward."""
+
+    volatility: float
+    """Annualised volatility, e.g. 0.28 for 28%."""
+
+    beta: float
+    """Correlation with the shared market factor, 0 to 1."""
+
+
+PROFILES: dict[str, TickerProfile] = {
+    "AAPL": TickerProfile(190.0, 0.28, 0.85),
+    "GOOGL": TickerProfile(175.0, 0.32, 0.85),
+    "MSFT": TickerProfile(420.0, 0.26, 0.85),
+    "AMZN": TickerProfile(185.0, 0.35, 0.80),
+    "TSLA": TickerProfile(250.0, 0.60, 0.70),
+    "NVDA": TickerProfile(880.0, 0.55, 0.75),
+    "META": TickerProfile(500.0, 0.38, 0.80),
+    "JPM": TickerProfile(200.0, 0.22, 0.50),
+    "V": TickerProfile(280.0, 0.20, 0.55),
+    "NFLX": TickerProfile(610.0, 0.40, 0.65),
 }
 
-# Per-ticker GBM parameters
-# sigma: annualized volatility (higher = more price movement)
-# mu: annualized drift / expected return
-TICKER_PARAMS: dict[str, dict[str, float]] = {
-    "AAPL": {"sigma": 0.22, "mu": 0.05},
-    "GOOGL": {"sigma": 0.25, "mu": 0.05},
-    "MSFT": {"sigma": 0.20, "mu": 0.05},
-    "AMZN": {"sigma": 0.28, "mu": 0.05},
-    "TSLA": {"sigma": 0.50, "mu": 0.03},  # High volatility
-    "NVDA": {"sigma": 0.40, "mu": 0.08},  # High volatility, strong drift
-    "META": {"sigma": 0.30, "mu": 0.05},
-    "JPM": {"sigma": 0.18, "mu": 0.04},  # Low volatility (bank)
-    "V": {"sigma": 0.17, "mu": 0.04},  # Low volatility (payments)
-    "NFLX": {"sigma": 0.35, "mu": 0.05},
-}
+DEFAULT_VOLATILITY = 0.35
+DEFAULT_BETA = 0.70
 
-# Default parameters for tickers not in the list above (dynamically added)
-DEFAULT_PARAMS: dict[str, float] = {"sigma": 0.25, "mu": 0.05}
 
-# Correlation groups for the simulator's Cholesky decomposition
-# Tickers in the same group have higher intra-group correlation
-CORRELATION_GROUPS: dict[str, set[str]] = {
-    "tech": {"AAPL", "GOOGL", "MSFT", "AMZN", "META", "NVDA", "NFLX"},
-    "finance": {"JPM", "V"},
-}
+def profile_for(ticker: str) -> TickerProfile:
+    """Profile for a known ticker, or a deterministic synthetic one."""
+    if ticker in PROFILES:
+        return PROFILES[ticker]
 
-# Correlation coefficients
-INTRA_TECH_CORR = 0.6  # Tech stocks move together
-INTRA_FINANCE_CORR = 0.5  # Finance stocks move together
-CROSS_GROUP_CORR = 0.3  # Between sectors / unknown tickers
-TSLA_CORR = 0.3  # TSLA does its own thing
+    digest = hashlib.md5(ticker.encode()).hexdigest()
+    anchor = 20.0 + (int(digest[:8], 16) % 38000) / 100.0
+    return TickerProfile(anchor, DEFAULT_VOLATILITY, DEFAULT_BETA)

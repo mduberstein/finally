@@ -1,131 +1,169 @@
-"""Tests for GBMSimulator."""
+import asyncio
+import math
 
-from app.market.seed_prices import SEED_PRICES
-from app.market.simulator import GBMSimulator
+import pytest
+
+from app.market import seed_prices, simulator
+from app.market.seed_prices import PROFILES, profile_for
+from app.market.simulator import SimulatorSource
 
 
-class TestGBMSimulator:
-    """Unit tests for the GBM price simulator."""
+async def run_ticks(source: SimulatorSource, tickers: list[str], n: int) -> dict[str, list[float]]:
+    history: dict[str, list[float]] = {ticker: [] for ticker in tickers}
+    for _ in range(n):
+        quotes = await source.fetch(tickers)
+        for q in quotes:
+            history[q.ticker].append(q.price)
+    return history
 
-    def test_step_returns_all_tickers(self):
-        """Test that step() returns prices for all tickers."""
-        sim = GBMSimulator(tickers=["AAPL", "GOOGL"])
-        result = sim.step()
-        assert set(result.keys()) == {"AAPL", "GOOGL"}
 
-    def test_prices_are_positive(self):
-        """GBM prices can never go negative (exp() is always positive)."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        for _ in range(10_000):
-            prices = sim.step()
-            assert prices["AAPL"] > 0
+def test_determinism_same_seed_same_prices():
+    async def _run():
+        source_a = SimulatorSource(seed=42)
+        source_b = SimulatorSource(seed=42)
+        history_a = await run_ticks(source_a, ["AAPL", "TSLA"], 200)
+        history_b = await run_ticks(source_b, ["AAPL", "TSLA"], 200)
+        return history_a, history_b
 
-    def test_initial_prices_match_seeds(self):
-        """Test that initial prices match seed prices."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        # Before any step, price should be the seed price
-        assert sim.get_price("AAPL") == SEED_PRICES["AAPL"]
+    history_a, history_b = asyncio.run(_run())
+    assert history_a == history_b
 
-    def test_add_ticker(self):
-        """Test adding a ticker dynamically."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        sim.add_ticker("TSLA")
-        result = sim.step()
-        assert "TSLA" in result
 
-    def test_remove_ticker(self):
-        """Test removing a ticker."""
-        sim = GBMSimulator(tickers=["AAPL", "GOOGL"])
-        sim.remove_ticker("GOOGL")
-        result = sim.step()
-        assert "GOOGL" not in result
-        assert "AAPL" in result
+def test_different_seeds_diverge():
+    async def _run():
+        source_a = SimulatorSource(seed=1)
+        source_b = SimulatorSource(seed=2)
+        history_a = await run_ticks(source_a, ["AAPL"], 50)
+        history_b = await run_ticks(source_b, ["AAPL"], 50)
+        return history_a, history_b
 
-    def test_add_duplicate_is_noop(self):
-        """Test that adding a duplicate ticker is a no-op."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        sim.add_ticker("AAPL")
-        assert len(sim._tickers) == 1
+    history_a, history_b = asyncio.run(_run())
+    assert history_a != history_b
 
-    def test_remove_nonexistent_is_noop(self):
-        """Test that removing a non-existent ticker is a no-op."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        sim.remove_ticker("NOPE")  # Should not raise
 
-    def test_unknown_ticker_gets_random_seed_price(self):
-        """Test that unknown tickers get random seed prices."""
-        sim = GBMSimulator(tickers=["ZZZZ"])
-        price = sim.get_price("ZZZZ")
-        assert price is not None
-        assert 50.0 <= price <= 300.0
+def test_prices_are_always_positive(monkeypatch):
+    monkeypatch.setattr(simulator, "EVENT_PROBABILITY", 8e-5)
 
-    def test_empty_step(self):
-        """Test stepping with no tickers."""
-        sim = GBMSimulator(tickers=[])
-        result = sim.step()
-        assert result == {}
+    async def _run():
+        source = SimulatorSource(seed=7)
+        history = await run_ticks(source, ["AAPL", "TSLA", "NVDA"], 20_000)
+        return history
 
-    def test_prices_change_over_time(self):
-        """After many steps, prices should have drifted from their seeds."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        initial_price = sim.get_price("AAPL")
+    history = asyncio.run(_run())
+    for prices in history.values():
+        assert all(price > 0 for price in prices)
 
-        for _ in range(1000):
-            sim.step()
 
-        final_price = sim.get_price("AAPL")
-        # Price should have changed (extremely unlikely to be exactly the seed)
-        assert final_price != initial_price
+def test_env_seed_used_when_no_explicit_seed(monkeypatch):
+    monkeypatch.setenv("MARKET_SEED", "123")
+    source_a = SimulatorSource()
+    source_b = SimulatorSource(seed=123)
 
-    def test_cholesky_rebuilds_on_add(self):
-        """Test that Cholesky matrix is rebuilt when tickers are added."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        assert sim._cholesky is None  # Only 1 ticker, no correlation matrix
-        sim.add_ticker("GOOGL")
-        assert sim._cholesky is not None  # Now 2 tickers, matrix exists
+    async def _run():
+        return await run_ticks(source_a, ["AAPL"], 20), await run_ticks(source_b, ["AAPL"], 20)
 
-    def test_cholesky_none_with_one_ticker(self):
-        """Test that Cholesky is None with only one ticker."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        assert sim._cholesky is None
+    history_a, history_b = asyncio.run(_run())
+    assert history_a == history_b
 
-    def test_get_price_returns_none_for_unknown(self):
-        """Test that get_price returns None for unknown ticker."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        assert sim.get_price("UNKNOWN") is None
 
-    def test_pairwise_correlation_tech_stocks(self):
-        """Test that tech stocks have high correlation."""
-        corr = GBMSimulator._pairwise_correlation("AAPL", "GOOGL")
-        assert corr == 0.6
+def test_realised_volatility_close_to_configured_sigma(monkeypatch):
+    monkeypatch.setattr(simulator, "EVENT_PROBABILITY", 0.0)
 
-    def test_pairwise_correlation_finance_stocks(self):
-        """Test that finance stocks have moderate correlation."""
-        corr = GBMSimulator._pairwise_correlation("JPM", "V")
-        assert corr == 0.5
+    async def _run():
+        source = SimulatorSource(seed=99)
+        return await run_ticks(source, ["AAPL"], 20_000)
 
-    def test_pairwise_correlation_tsla(self):
-        """Test that TSLA has lower correlation with everything."""
-        corr = GBMSimulator._pairwise_correlation("TSLA", "AAPL")
-        assert corr == 0.3
-        corr = GBMSimulator._pairwise_correlation("TSLA", "JPM")
-        assert corr == 0.3
+    history = asyncio.run(_run())["AAPL"]
 
-    def test_pairwise_correlation_cross_sector(self):
-        """Test cross-sector correlation."""
-        corr = GBMSimulator._pairwise_correlation("AAPL", "JPM")
-        assert corr == 0.3
+    log_returns = [math.log(b / a) for a, b in zip(history, history[1:])]
+    mean = sum(log_returns) / len(log_returns)
+    variance = sum((r - mean) ** 2 for r in log_returns) / (len(log_returns) - 1)
+    realised_sigma = math.sqrt(variance / simulator.DT)
 
-    def test_default_dt_is_reasonable(self):
-        """Test that default dt is a reasonable small value."""
-        assert 0 < GBMSimulator.DEFAULT_DT < 0.0001
+    configured_sigma = PROFILES["AAPL"].volatility
+    relative_error = abs(realised_sigma - configured_sigma) / configured_sigma
+    assert relative_error < 0.25
 
-    def test_prices_rounded_to_two_decimals(self):
-        """Test that prices are rounded to 2 decimal places."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        result = sim.step()
-        price_str = str(result["AAPL"])
-        # Check that we have at most 2 decimal places
-        if '.' in price_str:
-            decimal_part = price_str.split('.')[1]
-            assert len(decimal_part) <= 2
+
+def test_correlation_ordering_tech_vs_cross_sector(monkeypatch):
+    monkeypatch.setattr(simulator, "EVENT_PROBABILITY", 0.0)
+
+    async def _run():
+        source = SimulatorSource(seed=99)
+        return await run_ticks(source, ["AAPL", "MSFT", "JPM"], 20_000)
+
+    history = asyncio.run(_run())
+
+    def log_returns(prices: list[float]) -> list[float]:
+        return [math.log(b / a) for a, b in zip(prices, prices[1:])]
+
+    def correlation(xs: list[float], ys: list[float]) -> float:
+        mean_x, mean_y = sum(xs) / len(xs), sum(ys) / len(ys)
+        cov = sum((x - mean_x) * (y - mean_y) for x, y in zip(xs, ys))
+        var_x = sum((x - mean_x) ** 2 for x in xs)
+        var_y = sum((y - mean_y) ** 2 for y in ys)
+        return cov / math.sqrt(var_x * var_y)
+
+    aapl, msft, jpm = (log_returns(history[t]) for t in ("AAPL", "MSFT", "JPM"))
+    corr_tech = correlation(aapl, msft)
+    corr_cross_sector = correlation(aapl, jpm)
+
+    assert corr_tech > corr_cross_sector
+
+
+def test_event_probability_produces_occasional_jumps(monkeypatch):
+    monkeypatch.setattr(simulator, "EVENT_PROBABILITY", 0.5)
+
+    async def _run():
+        source = SimulatorSource(seed=3)
+        return await run_ticks(source, ["AAPL"], 200)
+
+    history = asyncio.run(_run())["AAPL"]
+    changes = [abs(b / a - 1) for a, b in zip(history, history[1:])]
+    assert any(change > 0.01 for change in changes)
+
+
+def test_profile_for_known_ticker_returns_exact_profile():
+    assert profile_for("AAPL") == PROFILES["AAPL"]
+
+
+def test_profile_for_unknown_ticker_is_deterministic():
+    first = profile_for("PYPL")
+    second = profile_for("PYPL")
+    assert first == second
+
+
+def test_profile_for_unknown_ticker_within_expected_range():
+    for ticker in ["PYPL", "AMD", "BRK.B", "SOME-NEW-TICKER"]:
+        profile = profile_for(ticker)
+        assert 20.0 <= profile.anchor <= 399.99
+        assert profile.volatility == seed_prices.DEFAULT_VOLATILITY
+        assert profile.beta == seed_prices.DEFAULT_BETA
+
+
+def test_profile_for_unknown_tickers_differ():
+    anchors = {profile_for(t).anchor for t in ["PYPL", "AMD", "BRK.B"]}
+    assert len(anchors) > 1
+
+
+def test_fetch_omits_nothing_for_requested_tickers():
+    async def _run():
+        source = SimulatorSource(seed=1)
+        return await source.fetch(["AAPL", "MADE-UP-TICKER"])
+
+    quotes = asyncio.run(_run())
+    assert {q.ticker for q in quotes} == {"AAPL", "MADE-UP-TICKER"}
+
+
+def test_fetch_empty_tickers_returns_empty_list():
+    async def _run():
+        source = SimulatorSource(seed=1)
+        return await source.fetch([])
+
+    assert asyncio.run(_run()) == []
+
+
+@pytest.mark.asyncio
+async def test_aclose_is_a_noop():
+    source = SimulatorSource(seed=1)
+    await source.aclose()

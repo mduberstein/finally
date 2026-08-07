@@ -1,55 +1,35 @@
-# FinAlly Backend
+# Backend — Market Data
 
-FastAPI backend for the FinAlly AI Trading Workstation.
+The market data subsystem lives in `app/market/`, per
+`planning/MARKET_DATA_DESIGN.md`. It exposes one abstract source contract
+(`MarketDataSource.fetch(tickers) -> list[Quote]`) with two implementations —
+a built-in GBM simulator (default) and a Massive (Polygon.io) REST poller
+(when `MASSIVE_API_KEY` is set) — feeding a `PriceCache` through a
+`MarketFeed` background task.
 
-## Structure
-
-- `app/` - Application code
-  - `market/` - Market data subsystem
-    - `models.py` - PriceUpdate dataclass
-    - `cache.py` - Thread-safe price cache
-    - `interface.py` - MarketDataSource abstract interface
-    - `simulator.py` - GBM-based market simulator
-    - `massive_client.py` - Massive/Polygon.io API client
-    - `factory.py` - Data source factory
-    - `stream.py` - SSE streaming endpoint
-    - `seed_prices.py` - Default ticker prices and parameters
-
-- `tests/` - Unit and integration tests
-  - `market/` - Market data tests
-
-## Running Tests
+## Setup
 
 ```bash
-# Install dependencies
-uv sync --dev
-
-# Run all tests
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=app --cov-report=html
-
-# Run specific test file
-uv run pytest tests/market/test_simulator.py
-
-# Run with verbose output
-uv run pytest -v
+cd backend
+uv sync --extra dev
 ```
 
-## Environment Variables
+## Usage
 
-- `MASSIVE_API_KEY` - Optional. If set, use real market data from Massive API. If not set, use the built-in simulator.
+```python
+from app.market import MarketFeed, PriceCache, create_source
 
-## Development
+cache = PriceCache()
+feed = MarketFeed(create_source(), cache, lambda: ["AAPL", "GOOGL"])
+feed.start()
+...
+await feed.stop()
+```
+
+## Tests
 
 ```bash
-# Install dependencies
-uv sync --dev
-
-# Run linter
-uv run ruff check .
-
-# Format code
-uv run ruff format .
+uv run pytest -v
+uv run pytest --cov=app
+uv run ruff check app/ tests/
 ```
