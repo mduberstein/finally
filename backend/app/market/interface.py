@@ -30,3 +30,4 @@ class MarketDataSource(ABC):
 
     async def aclose(self) -> None:
         """Release any held resources. Overridden where needed."""
+        return None
