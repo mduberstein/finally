@@ -55,7 +55,7 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr: *)'
-          claude_args: '--allowed-tools Bash(gh pr: *) Bash(git checkout:*) '
+          claude_args: '--allowed-tools "Bash(git fetch:*),Bash(git checkout:*),Bash(git ls-remote:*)"'
 
   claude-manual:
     if: github.event_name == 'workflow_dispatch'
