@@ -11,6 +11,10 @@ def create_source() -> MarketDataSource:
     """The one place that decides which market data source is live."""
     api_key = os.getenv("MASSIVE_API_KEY", "").strip()
     if api_key:
-        interval = float(os.getenv("MARKET_POLL_INTERVAL", "15"))
+        interval_raw = os.getenv("MARKET_POLL_INTERVAL", "15")
+        try:
+            interval = float(interval_raw)
+        except ValueError:
+            interval = 15.0
         return MassiveSource(api_key, poll_interval=interval)
     return SimulatorSource()
