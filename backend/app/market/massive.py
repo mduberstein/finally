@@ -15,18 +15,20 @@ class MassiveSource(MarketDataSource):
 
     name = "massive"
 
-    def __init__(
-        self,
-        api_key: str,
-        poll_interval: float = 15.0,
-        client: httpx.AsyncClient | None = None,
-    ) -> None:
-        self.poll_interval = poll_interval
-        self._client = client or httpx.AsyncClient(
-            base_url=BASE_URL,
-            headers={"Authorization": f"Bearer {api_key}"},
-            timeout=10.0,
-        )
+def __init__(
+    self,
+    api_key: str,
+    poll_interval: float = 15.0,
+    client: httpx.AsyncClient | None = None,
+) -> None:
+    self.poll_interval = poll_interval
+    self._client = client or httpx.AsyncClient(
+        base_url=BASE_URL,
+        headers={"Authorization": f"Bearer {api_key}"},
+        timeout=10.0,
+    )
+    if "authorization" not in self._client.headers:
+        self._client.headers["Authorization"] = f"Bearer {api_key}"
 
     async def fetch(self, tickers: Sequence[str]) -> list[Quote]:
         if not tickers:
