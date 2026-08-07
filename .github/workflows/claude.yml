@@ -36,11 +36,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-<<<<<<< HEAD
-          fetch-depth: 1
-=======
           fetch-depth: 0 # Full history so Claude can diff against other branches
->>>>>>> 5669ff1 (Fix checkout and permissions for remote Claude agent runs)
 
       - name: Run Claude Code
         id: claude
@@ -59,6 +55,7 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr:*)'
+          claude_args: '--allowed-tools "Bash(git fetch:*),Bash(git checkout:*),Bash(git ls-remote:*)"'
 
   claude-manual:
     if: github.event_name == 'workflow_dispatch'
@@ -73,12 +70,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-<<<<<<< HEAD
-          fetch-depth: 1
-=======
           fetch-depth: 0 # Full history so Claude can diff against other branches
           ref: week3day2
->>>>>>> 5669ff1 (Fix checkout and permissions for remote Claude agent runs)
 
       - name: Run Claude Code (manual)
         id: claude-manual
