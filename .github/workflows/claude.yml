@@ -27,7 +27,7 @@ jobs:
       )
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write # Required for Claude to commit and push
       pull-requests: read
       issues: read
       id-token: write
@@ -36,7 +36,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+<<<<<<< HEAD
           fetch-depth: 1
+=======
+          fetch-depth: 0 # Full history so Claude can diff against other branches
+>>>>>>> 5669ff1 (Fix checkout and permissions for remote Claude agent runs)
 
       - name: Run Claude Code
         id: claude
@@ -60,7 +64,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: read
       issues: read
       id-token: write
@@ -69,7 +73,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+<<<<<<< HEAD
           fetch-depth: 1
+=======
+          fetch-depth: 0 # Full history so Claude can diff against other branches
+          ref: week3day2
+>>>>>>> 5669ff1 (Fix checkout and permissions for remote Claude agent runs)
 
       - name: Run Claude Code (manual)
         id: claude-manual
