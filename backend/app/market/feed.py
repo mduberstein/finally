@@ -51,10 +51,15 @@ class MarketFeed:
         self._task = asyncio.create_task(self._run())
 
     async def stop(self) -> None:
-        if self._task:
-            self._task.cancel()
+        task = self._task
+        if task is not None:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+            self._task = None
         await self._source.aclose()
-
     async def _run(self) -> None:
         while True:
             await self._tick()
