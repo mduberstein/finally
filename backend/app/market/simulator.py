@@ -32,14 +32,16 @@ class SimulatorSource(MarketDataSource):
         self._rng = random.Random(seed)
         self._prices: dict[str, float] = {}
 
-    async def fetch(self, tickers: Sequence[str]) -> list[Quote]:
-        """Advance every requested ticker one tick."""
-        market_shock = self._rng.gauss(0, 1)
-        now = datetime.now(UTC)
-        return [
-            Quote(ticker, self._advance(ticker, market_shock), now)
-            for ticker in tickers
-        ]
+async def fetch(self, tickers: Sequence[str]) -> list[Quote]:
+    """Advance every requested ticker one tick."""
+    if not tickers:
+        return []
+    market_shock = self._rng.gauss(0, 1)
+    now = datetime.now(UTC)
+    return [
+        Quote(ticker, self._advance(ticker, market_shock), now)
+        for ticker in tickers
+    ]
 
     def _advance(self, ticker: str, market_shock: float) -> float:
         profile = profile_for(ticker)
