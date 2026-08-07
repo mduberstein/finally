@@ -36,4 +36,4 @@ Compared:
 
 ## Notable Specification Gap
 
-- The current document specifies automatic Massive-to-simulator fallback for HTTP 401/403 and exponential backoff for HTTP 429, but the shown `MarketFeed` and factory code only log generic exceptions and retry at the unchanged interval. Implementation must add explicit status-aware switching/backoff logic for the documented failure policy to be fully realized.
+- The previously noted gap (missing status-aware fallback/backoff) has been addressed in `backend/app/market/feed.py` (401/403 fallback via `fallback_factory`, 429 backoff via `_backoff_interval`). Keep this section updated if behavior changes.
