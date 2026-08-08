@@ -233,10 +233,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.market import MarketFeed, PriceCache, create_source
 from app.market.simulator import SimulatorSource
+from app.market.stream import create_stream_router
+
+cache = PriceCache()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    cache = PriceCache()
     feed = MarketFeed(
         create_source(), cache, watchlist_tickers,
         fallback_factory=SimulatorSource,  # remember to pass this explicitly
