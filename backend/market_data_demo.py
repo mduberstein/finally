@@ -6,7 +6,7 @@ notable single-tick moves ("drama events"). Runs for 60 seconds or until
 Ctrl+C. Uses `SimulatorSource` and `PriceCache` from `app/market/` directly —
 no FastAPI, no network.
 
-    cd backend && uv run market_data_demo.py
+    cd backend && uv sync --extra demo && uv run --extra demo market_data_demo.py
 """
 
 import asyncio
