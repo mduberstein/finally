@@ -32,10 +32,10 @@ NOTABLE_CHANGE_PCT = 1.0
 MAX_LOGGED_EVENTS = 8
 
 DEMO_EVENT_PROBABILITY = 3e-4
-"""~4x the production default (`EVENT_PROBABILITY = 8e-5`). At the production
-rate a 60s run only expects ~1 drama event across all 10 tickers; this bumps
-it to a handful so the event log actually has something to show, without
-touching how the jump itself is computed."""
+# ~4x the production default (`EVENT_PROBABILITY = 8e-5`). At the production
+# rate a 60s run only expects ~1 drama event across all 10 tickers; this bumps
+# it to a handful so the event log actually has something to show, without
+# touching how the jump itself is computed.
 
 SPARK_CHARS = "▁▂▃▄▅▆▇█"
 
