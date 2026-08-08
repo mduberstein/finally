@@ -1,103 +1,105 @@
-"""Tests for PriceCache."""
+from datetime import UTC, datetime
 
 from app.market.cache import PriceCache
+from app.market.models import Quote
 
 
-class TestPriceCache:
-    """Unit tests for the PriceCache."""
+def _quote(ticker: str, price: float) -> Quote:
+    return Quote(ticker=ticker, price=price, timestamp=datetime.now(UTC))
 
-    def test_update_and_get(self):
-        """Test updating and getting a price."""
+
+class TestPriceCacheApply:
+    def test_first_sighting_is_flat(self):
         cache = PriceCache()
-        update = cache.update("AAPL", 190.50)
-        assert update.ticker == "AAPL"
-        assert update.price == 190.50
-        assert cache.get("AAPL") == update
+        changed = cache.apply([_quote("AAPL", 190.0)])
 
-    def test_first_update_is_flat(self):
-        """Test that the first update has flat direction."""
-        cache = PriceCache()
-        update = cache.update("AAPL", 190.50)
+        assert len(changed) == 1
+        update = changed[0]
+        assert update.price == 190.0
+        assert update.previous_price == 190.0
         assert update.direction == "flat"
-        assert update.previous_price == 190.50
 
-    def test_direction_up(self):
-        """Test price update with upward direction."""
+    def test_first_sighting_is_still_reported_as_changed(self):
         cache = PriceCache()
-        cache.update("AAPL", 190.00)
-        update = cache.update("AAPL", 191.00)
-        assert update.direction == "up"
-        assert update.change == 1.00
+        changed = cache.apply([_quote("AAPL", 190.0)])
+        assert [u.ticker for u in changed] == ["AAPL"]
 
-    def test_direction_down(self):
-        """Test price update with downward direction."""
+    def test_rise_yields_up(self):
         cache = PriceCache()
-        cache.update("AAPL", 190.00)
-        update = cache.update("AAPL", 189.00)
-        assert update.direction == "down"
-        assert update.change == -1.00
+        cache.apply([_quote("AAPL", 190.0)])
+        changed = cache.apply([_quote("AAPL", 195.0)])
 
-    def test_remove(self):
-        """Test removing a ticker from cache."""
+        assert len(changed) == 1
+        assert changed[0].direction == "up"
+        assert changed[0].previous_price == 190.0
+        assert changed[0].price == 195.0
+
+    def test_fall_yields_down(self):
         cache = PriceCache()
-        cache.update("AAPL", 190.00)
-        cache.remove("AAPL")
+        cache.apply([_quote("AAPL", 190.0)])
+        changed = cache.apply([_quote("AAPL", 185.0)])
+
+        assert changed[0].direction == "down"
+
+    def test_unchanged_price_is_not_reported_as_changed(self):
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 190.0)])
+        changed = cache.apply([_quote("AAPL", 190.0)])
+
+        assert changed == []
+
+    def test_unchanged_price_still_updates_get(self):
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 190.0)])
+        cache.apply([_quote("AAPL", 190.0)])
+
+        assert cache.get("AAPL").price == 190.0
+
+    def test_multiple_tickers_independent(self):
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 190.0), _quote("GOOGL", 175.0)])
+        changed = cache.apply([_quote("AAPL", 195.0), _quote("GOOGL", 175.0)])
+
+        assert [u.ticker for u in changed] == ["AAPL"]
+
+    def test_change_percent_math(self):
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 100.0)])
+        changed = cache.apply([_quote("AAPL", 110.0)])
+
+        assert changed[0].change == 10.0
+        assert changed[0].change_percent == 10.0
+
+
+class TestPriceCacheGet:
+    def test_unknown_ticker_returns_none(self):
+        cache = PriceCache()
         assert cache.get("AAPL") is None
 
-    def test_remove_nonexistent(self):
-        """Test removing a ticker that doesn't exist."""
+    def test_known_ticker_returns_latest(self):
         cache = PriceCache()
-        cache.remove("AAPL")  # Should not raise
+        cache.apply([_quote("AAPL", 190.0)])
+        cache.apply([_quote("AAPL", 200.0)])
 
-    def test_get_all(self):
-        """Test getting all prices."""
-        cache = PriceCache()
-        cache.update("AAPL", 190.00)
-        cache.update("GOOGL", 175.00)
-        all_prices = cache.get_all()
-        assert set(all_prices.keys()) == {"AAPL", "GOOGL"}
+        assert cache.get("AAPL").price == 200.0
 
-    def test_version_increments(self):
-        """Test that version counter increments."""
-        cache = PriceCache()
-        v0 = cache.version
-        cache.update("AAPL", 190.00)
-        assert cache.version == v0 + 1
-        cache.update("AAPL", 191.00)
-        assert cache.version == v0 + 2
 
-    def test_get_price_convenience(self):
-        """Test the convenience get_price method."""
+class TestPriceCacheSnapshot:
+    def test_empty_cache(self):
         cache = PriceCache()
-        cache.update("AAPL", 190.50)
-        assert cache.get_price("AAPL") == 190.50
-        assert cache.get_price("NOPE") is None
+        assert cache.snapshot() == []
 
-    def test_len(self):
-        """Test __len__ method."""
+    def test_returns_all_known_tickers(self):
         cache = PriceCache()
-        assert len(cache) == 0
-        cache.update("AAPL", 190.00)
-        assert len(cache) == 1
-        cache.update("GOOGL", 175.00)
-        assert len(cache) == 2
+        cache.apply([_quote("AAPL", 190.0), _quote("GOOGL", 175.0)])
 
-    def test_contains(self):
-        """Test __contains__ method."""
-        cache = PriceCache()
-        cache.update("AAPL", 190.00)
-        assert "AAPL" in cache
-        assert "GOOGL" not in cache
+        tickers = {u.ticker for u in cache.snapshot()}
+        assert tickers == {"AAPL", "GOOGL"}
 
-    def test_custom_timestamp(self):
-        """Test updating with a custom timestamp."""
+    def test_reflects_latest_price(self):
         cache = PriceCache()
-        custom_ts = 1234567890.0
-        update = cache.update("AAPL", 190.50, timestamp=custom_ts)
-        assert update.timestamp == custom_ts
+        cache.apply([_quote("AAPL", 190.0)])
+        cache.apply([_quote("AAPL", 200.0)])
 
-    def test_price_rounding(self):
-        """Test that prices are rounded to 2 decimal places."""
-        cache = PriceCache()
-        update = cache.update("AAPL", 190.12345)
-        assert update.price == 190.12
+        snapshot = {u.ticker: u.price for u in cache.snapshot()}
+        assert snapshot["AAPL"] == 200.0

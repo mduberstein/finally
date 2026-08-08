@@ -54,7 +54,7 @@ jobs:
           # Optional: Add claude_args to customize behavior and configuration
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr:*)'
+          # claude_args: '--allowed-tools Bash(gh pr: *)'
           claude_args: '--allowed-tools "Bash(git fetch:*),Bash(git checkout:*),Bash(git ls-remote:*)"'
 
   claude-manual:
@@ -71,7 +71,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Full history so Claude can diff against other branches
-          ref: week3day2
+          # ref: week3day2 # Optional: Specify a branch or commit to checkout. If not specified, the default branch will be used.
 
       - name: Run Claude Code (manual)
         id: claude-manual

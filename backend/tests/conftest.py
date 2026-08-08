@@ -1,11 +1,8 @@
-"""Pytest configuration and fixtures."""
-
 import pytest
 
 
-@pytest.fixture
-def event_loop_policy():
-    """Use the default event loop policy for all async tests."""
-    import asyncio
-
-    return asyncio.DefaultEventLoopPolicy()
+@pytest.fixture(autouse=True)
+def _clean_market_env(monkeypatch):
+    """Every test starts with no market-related environment variables set."""
+    for var in ("MASSIVE_API_KEY", "MARKET_POLL_INTERVAL", "MARKET_SEED"):
+        monkeypatch.delenv(var, raising=False)

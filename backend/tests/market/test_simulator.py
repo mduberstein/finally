@@ -1,131 +1,196 @@
-"""Tests for GBMSimulator."""
+import math
 
-from app.market.seed_prices import SEED_PRICES
-from app.market.simulator import GBMSimulator
+import pytest
+
+from app.market import simulator as simulator_module
+from app.market.simulator import DT, EVENT_MAX, EVENT_MIN, SimulatorSource
 
 
-class TestGBMSimulator:
-    """Unit tests for the GBM price simulator."""
+class TestSimulatorSourceDeterminism:
+    async def test_same_seed_produces_identical_price_sequence(self):
+        a = SimulatorSource(seed=42)
+        b = SimulatorSource(seed=42)
 
-    def test_step_returns_all_tickers(self):
-        """Test that step() returns prices for all tickers."""
-        sim = GBMSimulator(tickers=["AAPL", "GOOGL"])
-        result = sim.step()
-        assert set(result.keys()) == {"AAPL", "GOOGL"}
+        for _ in range(50):
+            quotes_a = await a.fetch(["AAPL", "GOOGL"])
+            quotes_b = await b.fetch(["AAPL", "GOOGL"])
+            assert [q.price for q in quotes_a] == [q.price for q in quotes_b]
 
-    def test_prices_are_positive(self):
-        """GBM prices can never go negative (exp() is always positive)."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        for _ in range(10_000):
-            prices = sim.step()
-            assert prices["AAPL"] > 0
+    async def test_different_seeds_diverge(self):
+        a = SimulatorSource(seed=1)
+        b = SimulatorSource(seed=2)
 
-    def test_initial_prices_match_seeds(self):
-        """Test that initial prices match seed prices."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        # Before any step, price should be the seed price
-        assert sim.get_price("AAPL") == SEED_PRICES["AAPL"]
+        for _ in range(20):
+            prices_a = [q.price for q in await a.fetch(["AAPL"])]
+            prices_b = [q.price for q in await b.fetch(["AAPL"])]
+        assert prices_a != prices_b
 
-    def test_add_ticker(self):
-        """Test adding a ticker dynamically."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        sim.add_ticker("TSLA")
-        result = sim.step()
-        assert "TSLA" in result
+    async def test_env_seed_is_used_when_no_explicit_seed(self, monkeypatch):
+        monkeypatch.setenv("MARKET_SEED", "7")
+        a = SimulatorSource()
+        b = SimulatorSource(seed=7)
 
-    def test_remove_ticker(self):
-        """Test removing a ticker."""
-        sim = GBMSimulator(tickers=["AAPL", "GOOGL"])
-        sim.remove_ticker("GOOGL")
-        result = sim.step()
-        assert "GOOGL" not in result
-        assert "AAPL" in result
+        for _ in range(10):
+            quotes_a = await a.fetch(["AAPL"])
+            quotes_b = await b.fetch(["AAPL"])
+            assert [q.price for q in quotes_a] == [q.price for q in quotes_b]
 
-    def test_add_duplicate_is_noop(self):
-        """Test that adding a duplicate ticker is a no-op."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        sim.add_ticker("AAPL")
-        assert len(sim._tickers) == 1
 
-    def test_remove_nonexistent_is_noop(self):
-        """Test that removing a non-existent ticker is a no-op."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        sim.remove_ticker("NOPE")  # Should not raise
+class TestSimulatorSourcePositivity:
+    async def test_prices_always_positive(self):
+        source = SimulatorSource(seed=123)
+        tickers = ["AAPL", "TSLA", "NVDA", "JPM"]
 
-    def test_unknown_ticker_gets_random_seed_price(self):
-        """Test that unknown tickers get random seed prices."""
-        sim = GBMSimulator(tickers=["ZZZZ"])
-        price = sim.get_price("ZZZZ")
-        assert price is not None
-        assert 50.0 <= price <= 300.0
+        for _ in range(2000):
+            quotes = await source.fetch(tickers)
+            assert all(q.price > 0 for q in quotes)
 
-    def test_empty_step(self):
-        """Test stepping with no tickers."""
-        sim = GBMSimulator(tickers=[])
-        result = sim.step()
-        assert result == {}
 
-    def test_prices_change_over_time(self):
-        """After many steps, prices should have drifted from their seeds."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        initial_price = sim.get_price("AAPL")
+class TestSimulatorSourceFetch:
+    async def test_returns_a_quote_per_requested_ticker(self):
+        source = SimulatorSource(seed=1)
+        quotes = await source.fetch(["AAPL", "GOOGL", "MSFT"])
+        assert [q.ticker for q in quotes] == ["AAPL", "GOOGL", "MSFT"]
 
-        for _ in range(1000):
-            sim.step()
+    async def test_empty_ticker_list_returns_empty(self):
+        source = SimulatorSource(seed=1)
+        assert await source.fetch([]) == []
 
-        final_price = sim.get_price("AAPL")
-        # Price should have changed (extremely unlikely to be exactly the seed)
-        assert final_price != initial_price
+    async def test_prices_a_ticker_it_has_never_seen(self):
+        source = SimulatorSource(seed=1)
+        quotes = await source.fetch(["ZZZZ"])
+        assert quotes[0].price > 0
 
-    def test_cholesky_rebuilds_on_add(self):
-        """Test that Cholesky matrix is rebuilt when tickers are added."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        assert sim._cholesky is None  # Only 1 ticker, no correlation matrix
-        sim.add_ticker("GOOGL")
-        assert sim._cholesky is not None  # Now 2 tickers, matrix exists
+    async def test_lazy_initialization_starts_near_anchor(self):
+        source = SimulatorSource(seed=1)
+        quotes = await source.fetch(["AAPL"])
+        # One tick of GBM at this dt moves price by a tiny fraction of a percent.
+        assert quotes[0].price == pytest.approx(190.0, rel=0.01)
 
-    def test_cholesky_none_with_one_ticker(self):
-        """Test that Cholesky is None with only one ticker."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        assert sim._cholesky is None
+    async def test_poll_interval_is_tick_seconds(self):
+        assert SimulatorSource.poll_interval == 0.5
 
-    def test_get_price_returns_none_for_unknown(self):
-        """Test that get_price returns None for unknown ticker."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        assert sim.get_price("UNKNOWN") is None
+    async def test_name_is_simulator(self):
+        assert SimulatorSource(seed=1).name == "simulator"
 
-    def test_pairwise_correlation_tech_stocks(self):
-        """Test that tech stocks have high correlation."""
-        corr = GBMSimulator._pairwise_correlation("AAPL", "GOOGL")
-        assert corr == 0.6
 
-    def test_pairwise_correlation_finance_stocks(self):
-        """Test that finance stocks have moderate correlation."""
-        corr = GBMSimulator._pairwise_correlation("JPM", "V")
-        assert corr == 0.5
+class TestSimulatorSourceEvents:
+    """Directly exercises `_event_multiplier`'s jump branch.
 
-    def test_pairwise_correlation_tsla(self):
-        """Test that TSLA has lower correlation with everything."""
-        corr = GBMSimulator._pairwise_correlation("TSLA", "AAPL")
-        assert corr == 0.3
-        corr = GBMSimulator._pairwise_correlation("TSLA", "JPM")
-        assert corr == 0.3
+    The statistics tests below disable events entirely (they'd otherwise
+    swamp the diffusion), so nothing else in the suite ever forces this
+    branch or checks its magnitude/direction. Force it explicitly here by
+    controlling the RNG calls it makes, in order: `random()` (event
+    trigger), `uniform()` (magnitude), `random()` again (direction).
+    """
 
-    def test_pairwise_correlation_cross_sector(self):
-        """Test cross-sector correlation."""
-        corr = GBMSimulator._pairwise_correlation("AAPL", "JPM")
-        assert corr == 0.3
+    def test_below_threshold_returns_no_jump(self, monkeypatch):
+        source = SimulatorSource(seed=1)
+        monkeypatch.setattr(source._rng, "random", lambda: 0.999)
 
-    def test_default_dt_is_reasonable(self):
-        """Test that default dt is a reasonable small value."""
-        assert 0 < GBMSimulator.DEFAULT_DT < 0.0001
+        assert source._event_multiplier() == 1.0
 
-    def test_prices_rounded_to_two_decimals(self):
-        """Test that prices are rounded to 2 decimal places."""
-        sim = GBMSimulator(tickers=["AAPL"])
-        result = sim.step()
-        price_str = str(result["AAPL"])
-        # Check that we have at most 2 decimal places
-        if '.' in price_str:
-            decimal_part = price_str.split('.')[1]
-            assert len(decimal_part) <= 2
+    def test_triggered_event_jumps_upward_within_bounds(self, monkeypatch):
+        source = SimulatorSource(seed=1)
+        random_calls = iter([0.0, 0.0])  # triggers event, then direction < 0.5 -> up
+        monkeypatch.setattr(source._rng, "random", lambda: next(random_calls))
+        monkeypatch.setattr(source._rng, "uniform", lambda lo, hi: EVENT_MAX)
+
+        assert source._event_multiplier() == pytest.approx(1 + EVENT_MAX)
+
+    def test_triggered_event_jumps_downward_within_bounds(self, monkeypatch):
+        source = SimulatorSource(seed=1)
+        random_calls = iter([0.0, 0.99])  # triggers event, then direction >= 0.5 -> down
+        monkeypatch.setattr(source._rng, "random", lambda: next(random_calls))
+        monkeypatch.setattr(source._rng, "uniform", lambda lo, hi: EVENT_MIN)
+
+        assert source._event_multiplier() == pytest.approx(1 - EVENT_MIN)
+
+    def test_uniform_is_called_with_documented_bounds(self, monkeypatch):
+        source = SimulatorSource(seed=1)
+        monkeypatch.setattr(source._rng, "random", lambda: 0.0)
+        seen_bounds = []
+
+        def spy_uniform(lo, hi):
+            seen_bounds.append((lo, hi))
+            return lo
+
+        monkeypatch.setattr(source._rng, "uniform", spy_uniform)
+        source._event_multiplier()
+
+        assert seen_bounds == [(EVENT_MIN, EVENT_MAX)]
+
+
+class TestSimulatorSourceStatistics:
+    """Statistical properties measured with events disabled — see design doc
+    section 12: drama-event jumps are large and idiosyncratic enough to swamp
+    the diffusion statistics otherwise."""
+
+    async def test_realized_volatility_within_tolerance_of_configured_sigma(self, monkeypatch):
+        monkeypatch.setattr(simulator_module, "EVENT_PROBABILITY", 0.0)
+        source = SimulatorSource(seed=99)
+        ticker = "AAPL"
+        configured_sigma = 0.28
+
+        log_returns = []
+        previous = None
+        for _ in range(20000):
+            price = (await source.fetch([ticker]))[0].price
+            if previous is not None:
+                log_returns.append(math.log(price / previous))
+            previous = price
+
+        n = len(log_returns)
+        mean = sum(log_returns) / n
+        variance = sum((r - mean) ** 2 for r in log_returns) / n
+        realized_sigma = math.sqrt(variance / DT)
+
+        assert realized_sigma == pytest.approx(configured_sigma, rel=0.35)
+
+    async def test_correlation_ordering_tech_higher_than_cross_sector(self, monkeypatch):
+        monkeypatch.setattr(simulator_module, "EVENT_PROBABILITY", 0.0)
+        source = SimulatorSource(seed=7)
+
+        aapl, msft, jpm = [], [], []
+        for _ in range(20000):
+            quotes = await source.fetch(["AAPL", "MSFT", "JPM"])
+            aapl.append(quotes[0].price)
+            msft.append(quotes[1].price)
+            jpm.append(quotes[2].price)
+
+        def log_returns(prices):
+            return [math.log(prices[i] / prices[i - 1]) for i in range(1, len(prices))]
+
+        def correlation(xs, ys):
+            n = len(xs)
+            mean_x, mean_y = sum(xs) / n, sum(ys) / n
+            cov = sum((x - mean_x) * (y - mean_y) for x, y in zip(xs, ys)) / n
+            std_x = math.sqrt(sum((x - mean_x) ** 2 for x in xs) / n)
+            std_y = math.sqrt(sum((y - mean_y) ** 2 for y in ys) / n)
+            return cov / (std_x * std_y)
+
+        r_aapl, r_msft, r_jpm = log_returns(aapl), log_returns(msft), log_returns(jpm)
+        tech_corr = correlation(r_aapl, r_msft)
+        cross_corr = correlation(r_aapl, r_jpm)
+
+        assert tech_corr > cross_corr
+
+    async def test_market_shock_is_shared_across_tickers_in_one_fetch(self, monkeypatch):
+        """Drawing market_shock once per fetch (not per ticker) is what
+        creates correlation — verified indirectly via a beta=1 ticker pair
+        that must move identically before rounding/idiosyncratic noise."""
+        monkeypatch.setattr(simulator_module, "EVENT_PROBABILITY", 0.0)
+        source = SimulatorSource(seed=3)
+
+        seen_shocks = []
+        original_gauss = source._rng.gauss
+
+        def spy_gauss(mu, sigma):
+            value = original_gauss(mu, sigma)
+            seen_shocks.append(value)
+            return value
+
+        source._rng.gauss = spy_gauss
+        await source.fetch(["AAPL", "GOOGL", "MSFT"])
+        # market_shock (1) + one idiosyncratic draw per ticker (3) = 4 draws.
+        assert len(seen_shocks) == 4

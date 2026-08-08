@@ -1,55 +1,41 @@
-# FinAlly Backend
+# Backend — FinAlly
 
-FastAPI backend for the FinAlly AI Trading Workstation.
+## Project Setup
 
-## Structure
+```bash
+cd backend
+uv sync --extra dev   # Install all dependencies including test/lint tools
+```
 
-- `app/` - Application code
-  - `market/` - Market data subsystem
-    - `models.py` - PriceUpdate dataclass
-    - `cache.py` - Thread-safe price cache
-    - `interface.py` - MarketDataSource abstract interface
-    - `simulator.py` - GBM-based market simulator
-    - `massive_client.py` - Massive/Polygon.io API client
-    - `factory.py` - Data source factory
-    - `stream.py` - SSE streaming endpoint
-    - `seed_prices.py` - Default ticker prices and parameters
+## Market Data
 
-- `tests/` - Unit and integration tests
-  - `market/` - Market data tests
+The market data subsystem lives in `app/market/`, built against
+`planning/MARKET_DATA_DESIGN.md`. Public API:
+
+```python
+from app.market import (
+    MarketDataSource,
+    MarketFeed,
+    PriceCache,
+    PriceUpdate,
+    Quote,
+    create_source,
+)
+```
+
+- `create_source()` — the one environment-aware seam. Returns `MassiveSource`
+  if `MASSIVE_API_KEY` is set (non-blank), otherwise `SimulatorSource`.
+- `MarketFeed` — background polling task that reads a `MarketDataSource` on
+  its own cadence and writes into a `PriceCache`. Falls back from Massive to
+  the simulator on HTTP 401/403, and backs off the poll interval on HTTP 429.
+- `PriceCache` — in-memory store of latest/previous price per ticker; the
+  only component that computes `direction`.
+- SSE streaming for `/api/stream/prices` lives in `app/market/stream.py`.
 
 ## Running Tests
 
 ```bash
-# Install dependencies
-uv sync --dev
-
-# Run all tests
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=app --cov-report=html
-
-# Run specific test file
-uv run pytest tests/market/test_simulator.py
-
-# Run with verbose output
-uv run pytest -v
-```
-
-## Environment Variables
-
-- `MASSIVE_API_KEY` - Optional. If set, use real market data from Massive API. If not set, use the built-in simulator.
-
-## Development
-
-```bash
-# Install dependencies
-uv sync --dev
-
-# Run linter
-uv run ruff check .
-
-# Format code
-uv run ruff format .
+uv run pytest -v              # All tests
+uv run pytest --cov=app       # With coverage
+uv run ruff check app/ tests/ # Lint
 ```
