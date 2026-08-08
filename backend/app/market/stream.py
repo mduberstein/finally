@@ -56,6 +56,10 @@ def create_stream_router(cache: PriceCache) -> APIRouter:
 
     @router.get("/api/stream/prices")
     async def stream_prices(request: Request) -> EventSourceResponse:
+        # No explicit heartbeat here: EventSourceResponse defaults
+        # `ping_interval` to 15s and sends a `: ping` comment automatically,
+        # satisfying the design doc's "keep idle connections and
+        # intermediate proxies alive" requirement without extra code.
         return EventSourceResponse(price_events(cache))
 
     return router

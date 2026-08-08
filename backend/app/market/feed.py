@@ -48,6 +48,14 @@ class MarketFeed:
         return self._source
 
     def start(self) -> None:
+        """Start the background polling loop.
+
+        Raises `RuntimeError` if already running — starting twice would
+        leak the first task, which would keep polling and writing into the
+        cache alongside the new one.
+        """
+        if self._task is not None and not self._task.done():
+            raise RuntimeError("MarketFeed.start() called while already running")
         self._task = asyncio.create_task(self._run())
 
     async def stop(self) -> None:
@@ -60,6 +68,7 @@ class MarketFeed:
                 pass
             self._task = None
         await self._source.aclose()
+
     async def _run(self) -> None:
         while True:
             await self._tick()

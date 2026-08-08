@@ -2,6 +2,7 @@ import asyncio
 from datetime import UTC, datetime
 
 import httpx
+import pytest
 
 from app.market.cache import PriceCache
 from app.market.feed import MAX_POLL_INTERVAL, MarketFeed
@@ -189,6 +190,30 @@ class TestMarketFeedLifecycle:
             pass
 
         assert task.cancelled()
+
+    async def test_start_twice_raises(self):
+        source = FakeSource(poll_interval=0.01)
+        cache = PriceCache()
+        feed = MarketFeed(source, cache, lambda: ["AAPL"])
+
+        feed.start()
+        with pytest.raises(RuntimeError):
+            feed.start()
+
+        await feed.stop()
+
+    async def test_start_after_stop_is_allowed(self):
+        source = FakeSource(poll_interval=0.01)
+        cache = PriceCache()
+        feed = MarketFeed(source, cache, lambda: ["AAPL"])
+
+        feed.start()
+        await asyncio.sleep(0.01)
+        await feed.stop()
+
+        feed.start()  # does not raise — the previous task is gone
+        await asyncio.sleep(0.01)
+        await feed.stop()
 
     async def test_tickers_callable_is_read_each_poll(self):
         source = FakeSource(poll_interval=0.01)

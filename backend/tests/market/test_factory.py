@@ -35,3 +35,9 @@ class TestCreateSource:
     def test_key_with_surrounding_whitespace_is_stripped_but_used(self, monkeypatch):
         monkeypatch.setenv("MASSIVE_API_KEY", "  sk-live-abc123  ")
         assert isinstance(create_source(), MassiveSource)
+
+    def test_invalid_poll_interval_falls_back_to_default(self, monkeypatch):
+        monkeypatch.setenv("MASSIVE_API_KEY", "sk-live-abc123")
+        monkeypatch.setenv("MARKET_POLL_INTERVAL", "not-a-number")
+        source = create_source()
+        assert source.poll_interval == 15.0

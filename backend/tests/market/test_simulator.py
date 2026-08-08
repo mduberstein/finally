@@ -3,7 +3,7 @@ import math
 import pytest
 
 from app.market import simulator as simulator_module
-from app.market.simulator import DT, SimulatorSource
+from app.market.simulator import DT, EVENT_MAX, EVENT_MIN, SimulatorSource
 
 
 class TestSimulatorSourceDeterminism:
@@ -74,14 +74,59 @@ class TestSimulatorSourceFetch:
         assert SimulatorSource(seed=1).name == "simulator"
 
 
+class TestSimulatorSourceEvents:
+    """Directly exercises `_event_multiplier`'s jump branch.
+
+    The statistics tests below disable events entirely (they'd otherwise
+    swamp the diffusion), so nothing else in the suite ever forces this
+    branch or checks its magnitude/direction. Force it explicitly here by
+    controlling the RNG calls it makes, in order: `random()` (event
+    trigger), `uniform()` (magnitude), `random()` again (direction).
+    """
+
+    def test_below_threshold_returns_no_jump(self, monkeypatch):
+        source = SimulatorSource(seed=1)
+        monkeypatch.setattr(source._rng, "random", lambda: 0.999)
+
+        assert source._event_multiplier() == 1.0
+
+    def test_triggered_event_jumps_upward_within_bounds(self, monkeypatch):
+        source = SimulatorSource(seed=1)
+        random_calls = iter([0.0, 0.0])  # triggers event, then direction < 0.5 -> up
+        monkeypatch.setattr(source._rng, "random", lambda: next(random_calls))
+        monkeypatch.setattr(source._rng, "uniform", lambda lo, hi: EVENT_MAX)
+
+        assert source._event_multiplier() == pytest.approx(1 + EVENT_MAX)
+
+    def test_triggered_event_jumps_downward_within_bounds(self, monkeypatch):
+        source = SimulatorSource(seed=1)
+        random_calls = iter([0.0, 0.99])  # triggers event, then direction >= 0.5 -> down
+        monkeypatch.setattr(source._rng, "random", lambda: next(random_calls))
+        monkeypatch.setattr(source._rng, "uniform", lambda lo, hi: EVENT_MIN)
+
+        assert source._event_multiplier() == pytest.approx(1 - EVENT_MIN)
+
+    def test_uniform_is_called_with_documented_bounds(self, monkeypatch):
+        source = SimulatorSource(seed=1)
+        monkeypatch.setattr(source._rng, "random", lambda: 0.0)
+        seen_bounds = []
+
+        def spy_uniform(lo, hi):
+            seen_bounds.append((lo, hi))
+            return lo
+
+        monkeypatch.setattr(source._rng, "uniform", spy_uniform)
+        source._event_multiplier()
+
+        assert seen_bounds == [(EVENT_MIN, EVENT_MAX)]
+
+
 class TestSimulatorSourceStatistics:
     """Statistical properties measured with events disabled — see design doc
     section 12: drama-event jumps are large and idiosyncratic enough to swamp
     the diffusion statistics otherwise."""
 
-    async def test_realized_volatility_within_tolerance_of_configured_sigma(
-        self, monkeypatch
-    ):
+    async def test_realized_volatility_within_tolerance_of_configured_sigma(self, monkeypatch):
         monkeypatch.setattr(simulator_module, "EVENT_PROBABILITY", 0.0)
         source = SimulatorSource(seed=99)
         ticker = "AAPL"
@@ -102,9 +147,7 @@ class TestSimulatorSourceStatistics:
 
         assert realized_sigma == pytest.approx(configured_sigma, rel=0.35)
 
-    async def test_correlation_ordering_tech_higher_than_cross_sector(
-        self, monkeypatch
-    ):
+    async def test_correlation_ordering_tech_higher_than_cross_sector(self, monkeypatch):
         monkeypatch.setattr(simulator_module, "EVENT_PROBABILITY", 0.0)
         source = SimulatorSource(seed=7)
 

@@ -8,14 +8,45 @@ per instructions. Reviewed on branch `week3day2`.
 ## Verdict
 
 **Solid, ready to build on.** The implementation matches the design docs
-closely — in one respect it's ahead of them (see §3). All 94 tests pass, and
+closely — in one respect it's ahead of them (see §3). All tests pass, and
 the parts of the model that make the biggest engineering claims (GBM
 positivity, correlation, determinism, cache-owns-direction) are independently
-verifiable and hold up. Findings below are minor: two small test-coverage
+verifiable and hold up. Findings below were minor: two small test-coverage
 gaps, a handful of formatting/lint nits, and one un-load-bearing doc
-inaccuracy. Nothing here should block moving on to the next component.
+inaccuracy — **all of which have now been fixed** (§0). Nothing here should
+block moving on to the next component.
 
-## 1. Test Results
+## 0. Fixes Applied (post-review)
+
+Every actionable item from §4/§6 has been addressed:
+
+- **Lint**: removed the unused `UTC` import in `tests/market/test_massive.py`.
+- **Format**: ran `ruff format` on `app/market/feed.py`, `app/market/simulator.py`,
+  and `tests/market/test_simulator.py`.
+- **Drama-event coverage gap closed**: added `TestSimulatorSourceEvents` to
+  `test_simulator.py` — four tests that directly drive `_event_multiplier`'s
+  jump branch (below-threshold no-op, upward jump, downward jump, and the
+  `uniform(EVENT_MIN, EVENT_MAX)` call bounds), rather than relying on
+  disabled-event statistics tests to indirectly imply it's correct.
+- **`MARKET_POLL_INTERVAL` validation gap closed**: added
+  `test_invalid_poll_interval_falls_back_to_default` to `test_factory.py`.
+- **`MarketFeed.start()` made idempotent-safe**: it now raises `RuntimeError`
+  if called while already running, rather than silently leaking the previous
+  background task. Covered by `test_start_twice_raises` and
+  `test_start_after_stop_is_allowed` in `test_feed.py`.
+- **`stream.py` heartbeat**: added a one-line comment on the route explaining
+  that `EventSourceResponse`'s default 15s `ping_interval` already satisfies
+  the design doc's heartbeat requirement, so a future reader doesn't
+  "helpfully" add a redundant one.
+
+The `fallback_factory` wiring note in §3 is forward guidance for whoever
+writes the FastAPI `lifespan` handler next (that code doesn't exist yet) —
+nothing to fix in the market data module itself.
+
+Result: **101 tests pass** (up from 94), coverage **99%** (up from 98%), zero
+`ruff check` or `ruff format` findings on `app/` and `tests/`.
+
+## 1. Test Results (original review)
 
 ```
 94 passed in 3.46s
@@ -40,6 +71,26 @@ app/market/stream.py           28      1    96%   59
 ---------------------------------------------------------
 TOTAL                         253      6    98%
 ```
+
+Post-fix coverage (see §0):
+
+```
+Name                        Stmts   Miss  Cover   Missing
+---------------------------------------------------------
+app/market/factory.py          14      0   100%
+app/market/feed.py             62      1    98%   84
+app/market/simulator.py        45      0   100%
+app/market/stream.py           28      1    96%   63
+---------------------------------------------------------
+TOTAL                         255      2    99%
+```
+
+The two remaining uncovered lines are both defensive/framework code not worth
+contriving a test for: `feed.py`'s `except asyncio.CancelledError: raise`
+inside `_tick()` (cancellation in practice always lands inside `_run`'s
+`asyncio.sleep`), and `stream.py`'s route body (the actual logic lives in the
+separately-tested `price_events` generator; the route itself is a thin
+FastAPI wrapper that would need a live ASGI client to cover).
 
 The test suite is genuinely good, not just high-coverage: it tests the things
 that are easy to get subtly wrong (frozen dataclasses, `change_percent`
@@ -175,15 +226,7 @@ so a future reader doesn't "fix" it by adding a redundant heartbeat.
 
 ## 6. Recommendation
 
-Ship it as-is. Suggested follow-ups, roughly in priority order, none of which
-need to block starting the next component:
-
-1. `uv run ruff check --fix tests/market/test_massive.py` and
-   `uv run ruff format app/market/feed.py app/market/simulator.py tests/market/test_simulator.py`
-   — thirty seconds, zero risk.
-2. Add the two missing unit tests noted in §4 (forced drama event, invalid
-   `MARKET_POLL_INTERVAL`) — cheap, closes the only real coverage gaps.
-3. When writing the FastAPI `lifespan` wiring, remember to pass
-   `fallback_factory=SimulatorSource` to `MarketFeed` so the documented
-   401/403 auto-fallback is actually live, and consider guarding
-   `MarketFeed.start()` against being called twice.
+Ship it — done (see §0). The only remaining open item is not a defect in this
+module: when writing the FastAPI `lifespan` wiring, remember to pass
+`fallback_factory=SimulatorSource` to `MarketFeed` so the documented 401/403
+auto-fallback is actually live in production.

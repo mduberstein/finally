@@ -45,18 +45,14 @@ class SimulatorSource(MarketDataSource):
         """Advance every requested ticker one tick."""
         market_shock = self._rng.gauss(0, 1)
         now = datetime.now(UTC)
-        return [
-            Quote(ticker, self._advance(ticker, market_shock), now) for ticker in tickers
-        ]
+        return [Quote(ticker, self._advance(ticker, market_shock), now) for ticker in tickers]
 
     def _advance(self, ticker: str, market_shock: float) -> float:
         profile = profile_for(ticker)
         price = self._prices.get(ticker, profile.anchor)
         sigma = profile.volatility
 
-        shock = profile.beta * market_shock + math.sqrt(1 - profile.beta**2) * self._rng.gauss(
-            0, 1
-        )
+        shock = profile.beta * market_shock + math.sqrt(1 - profile.beta**2) * self._rng.gauss(0, 1)
 
         pull = KAPPA * math.log(profile.anchor / price) * DT
         ito = -0.5 * sigma**2 * DT
