@@ -1,0 +1,354 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(codex exec *)",
+      "WebSearch",
+      "WebFetch(domain:massive.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:polygon.io)",
+      "WebFetch(domain:github.com)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); i=d['info']; print\\('name:',i['name']\\); print\\('version:',i['version']\\); print\\('requires_python:',i['requires_python']\\); print\\('summary:',i['summary']\\); print\\('home:',i.get\\('home_page'\\) or i.get\\('project_urls'\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); i=d['info']; print\\('name:',i['name']\\); print\\('version:',i['version']\\); print\\('requires_python:',i['requires_python']\\); print\\('summary:',i['summary']\\)\")",
+      "Bash(python3 -c ' *)",
+      "Bash(.venv/bin/python -c ' *)",
+      "WebFetch(domain:files.pythonhosted.org)",
+      "Bash(uv run *)",
+      "Bash(UV_CACHE_DIR=\"$TMPDIR/uvcache\" uv run *)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "Bash(chmod +x scripts/start_mac.sh scripts/stop_mac.sh)",
+      "Bash(bash -n scripts/start_mac.sh)",
+      "Bash(bash -n scripts/stop_mac.sh)",
+      "Bash(pwsh -NoProfile -Command '$ErrorActionPreference=\"Stop\"; foreach \\($f in @\\(\"scripts/start_windows.ps1\",\"scripts/stop_windows.ps1\"\\)\\) { $e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile\\(\\(Resolve-Path $f\\), [ref]$null, [ref]$e\\); if \\($e.Count\\) { $e | ForEach-Object { $_.Message }; exit 1 } }; \"powershell syntax OK\"')",
+      "Bash(npm view *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(npx --yes create-next-app@latest frontend --ts --tailwind --eslint --app --src-dir --no-import-alias --use-npm --turbopack --disable-git)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/db -q)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run --extra dev pytest -q)",
+      "Bash(npm install *)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run --extra dev ruff check app/ tests/)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run --extra dev ruff format --check app/ tests/)",
+      "Bash(rm -f public/file.svg public/globe.svg public/next.svg public/vercel.svg public/window.svg src/app/favicon.ico AGENTS.md CLAUDE.md README.md)",
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\(p.dependencies, p.devDependencies\\)\")",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run --extra dev ruff format app/db/ tests/db/)",
+      "Bash(git add *)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run --extra dev pytest tests/db -q)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest -q)",
+      "Bash(git check-ignore *)",
+      "Bash(echo \"check-ignore exit: $?  \\(1 = not ignored, correct\\)\")",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv add litellm pydantic)",
+      "Bash(npm run *)",
+      "mcp__plugin_playwright_playwright__browser_resize",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/llm -q)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/llm/test_context.py -q)",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/llm/test_actions.py -q)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/portfolio -q)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/llm/test_service.py -q)",
+      "mcp__plugin_playwright_playwright__browser_type",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache DB_PATH=__TRACKED_VAR__/smoke.db uv run python -c ' *)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run ruff check app/ tests/)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run ruff format --check app/ tests/)",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run ruff check app/ tests/ --output-format=concise)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/api -q -p no:randomly)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run ruff check --fix app/api/chat.py app/llm/ tests/llm/)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run ruff format app/api/chat.py app/llm/ tests/llm/)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run ruff check app/api/chat.py app/llm/ tests/llm/)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run ruff format --check app/api/chat.py app/llm/ tests/llm/)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/api -q)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/api/test_app.py::TestWatchedTickers::test_reads_the_current_watchlist -q)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/llm tests/api/test_app.py -q)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest -q -p no:randomly)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run python -)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run python -c ' *)",
+      "Bash(npm test *)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/portfolio/test_recorder.py -q)",
+      "Bash(npm uninstall *)",
+      "Bash(grep -o 'OPENROUTER_API_KEY=.\\\\{0,6\\\\}' .env)",
+      "Bash(grep -o 'OPENROUTER_API_KEY=.\\\\{0,8\\\\}' .env)",
+      "Bash(rm -f __TRACKED_VAR__/smoke-finally.db*)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run python /Users/mdub/.claude/jobs/65ecf50a/tmp/smoke.py)",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "Bash(echo \"--- exit $? \\(1 = not found, confirms the gap\\) ---\")",
+      "Bash(docker info *)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache DB_PATH=__TRACKED_VAR__/routecheck.db LLM_MOCK=true uv run python -c ' *)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/api tests/portfolio -q --cov=app.api --cov=app.portfolio --cov=app.main --cov-report=term-missing)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(npm --version)",
+      "Read(//Applications/Docker.app/**)",
+      "Bash(open -a Docker)",
+      "Bash(time docker build -t finally .)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache uv run pytest tests/api/test_app.py -q)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache python3 -c 'import json;print\\(json.load\\(open\\('\\\\''package.json'\\\\''\\)\\)['\\\\''scripts'\\\\'']\\)')",
+      "Bash(curl -s localhost:8000/api/health)",
+      "Bash(curl -s localhost:8000/api/portfolio)",
+      "Bash(curl -s localhost:8000/api/watchlist)",
+      "Bash(curl -s localhost:8000/api/chat/history)",
+      "Bash(echo \"tsc-exit=$?\")",
+      "Bash(echo \"exit $? \\(1 = NOT ignored\\)\")",
+      "Bash(curl -s -X POST localhost:8000/api/chat -H 'Content-Type: application/json' -d '{\"message\":\"buy 10 shares of AAPL\"}')",
+      "Bash(curl -s --max-time 2 localhost:8000/api/stream/prices)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache python3 -c ' *)",
+      "Read(//private/tmp/claude-502/verifyctx-1/**)",
+      "Bash(docker build *)",
+      "Bash(docker rm *)",
+      "Bash(docker volume *)",
+      "Bash(lsof -nP -iTCP:8000 -sTCP:LISTEN)",
+      "Bash(docker run *)",
+      "Bash(curl -s \"localhost:8000/api/portfolio/history?limit=500\")",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:18000/api/health)",
+      "Bash(curl -s http://localhost:18000/)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:18000/)",
+      "Bash(echo \"HTTP $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:18000/\\)\")",
+      "Bash(curl -s -o /tmp/claude-502/unknown.html -w \"HTTP %{http_code}\\\\n\" http://localhost:18000/does-not-exist)",
+      "Read(//tmp/claude-502/**)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:18000/api/portfolio)",
+      "Bash(curl -s http://localhost:18000/does-not-exist)",
+      "Bash(docker exec *)",
+      "Bash(curl -s http://localhost:18000/api/watchlist)",
+      "Bash(curl -s -X POST http://localhost:18000/api/portfolio/trade -H 'Content-Type: application/json' -d '{\"ticker\":\"AAPL\",\"quantity\":3,\"side\":\"buy\"}')",
+      "Bash(curl -s http://localhost:18000/api/portfolio)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('cash=',d['cash_balance'],'positions=',[\\(p['ticker'],p['quantity']\\) for p in d['positions']]\\)\")",
+      "Bash(pkill -f \"uvicorn app.main:app\")",
+      "Bash(npx --yes npm@10 install --package-lock-only)",
+      "Bash(echo \"gen exit=$?\")",
+      "Bash(node -e ' *)",
+      "Bash(set -e)",
+      "Bash(docker network *)",
+      "Bash(curl -s http://localhost:8000/api/health)",
+      "Bash(curl -s http://localhost:8000/api/watchlist)",
+      "Bash(curl -s http://localhost:8000/api/portfolio)",
+      "Bash(curl -s \"http://localhost:8000/api/portfolio/history?limit=5\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\\\\n\" http://localhost:8000/)",
+      "Bash(docker rmi *)",
+      "Bash(npm ci *)",
+      "Bash(echo \"lint exit=$?\")",
+      "Bash(/Users/mdub/SOFT-DEV/GitHubRepos/AIProjects/finally/scripts/start_mac.sh)",
+      "Bash(curl -s -o /dev/null -w 'HTTP %{http_code} ' http://localhost:8000/api/health)",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(curl -s --max-time 3 -N http://localhost:8000/api/stream/prices)",
+      "Bash(docker version *)",
+      "Bash(curl -s -X POST http://localhost:18000/api/portfolio/trade -H 'Content-Type: application/json' -d '{\"ticker\":\"NVDA\",\"quantity\":5,\"side\":\"buy\"}')",
+      "Bash(python3 -c \"import json,sys;d=json.load\\(sys.stdin\\);print\\(' after : cash',d['cash_balance'],[\\(p['ticker'],p['quantity']\\) for p in d['positions']]\\)\")",
+      "Bash(echo \"  exit=$?\")",
+      "Bash(echo \"  \\(nothing above = stages nothing\\) exit=$?\")",
+      "Bash(echo \"  exit=$? \\(1 = not ignored, correct\\)\")",
+      "Bash(tee /tmp/claude-502/build24.log)",
+      "Bash(echo \"build exit=$?\")",
+      "Bash(./run.sh)",
+      "Bash(curl -s -w ' [HTTP %{http_code}]\\\\n' http://localhost:18000/api/health)",
+      "Bash(curl -s -o /dev/null -w ' [HTTP %{http_code}]\\\\n' http://localhost:18000/)",
+      "Bash(curl -s -o /tmp/claude-502/f1.html -w '[HTTP %{http_code}]' http://localhost:18000/positions/AAPL)",
+      "Bash(curl -s -w ' [HTTP %{http_code}]\\\\n' http://localhost:18000/api/nonsense)",
+      "Bash(curl -s -o /dev/null -w '[HTTP %{http_code}]\\\\n' http://localhost:18000/api/watchlist)",
+      "Bash(curl -s --max-time 3 -N http://localhost:18000/api/stream/prices)",
+      "Bash(grep -E '^finally\\(-real|-verify|-final\\)?$')",
+      "Bash(curl -s -m 3 -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:8000/api/health)",
+      "Bash(curl -s -m 3 http://localhost:8000/)",
+      "Bash(grep -i '^finally$')",
+      "Bash(grep -icE \"node_modules|\\\\.venv|__pycache__|\\\\.db$|\\\\.env$|backend/static/|/out/|\\\\.next/\")",
+      "Bash(UV_CACHE_DIR=\"$TMPDIR/uvcache\" python3 *)",
+      "Bash(UV_CACHE_DIR=__TRACKED_VAR__/uvcache python3 planning/.export_session.py ~/.claude/projects/-Users-mdub-SOFT-DEV-GitHubRepos-AIProjects-finally/65ecf50a-07d9-4c6e-a0cf-32c7db97fa43.jsonl planning/Week3_Clip85Day4_Interaction.md)",
+      "Bash(git ls-tree *)",
+      "Bash(npx gsd-core *)",
+      "Read(.planning/*)",
+      "Edit(.planning/*)",
+      "Read(STATE.md)",
+      "Edit(STATE.md)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(.secrets)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-check-update.js"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-session-state.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-context-monitor.js",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-read-injection-scanner.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-graphify-update.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-phase-boundary.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-prompt-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-read-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-workflow-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-worktree-path-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-agent-isolation-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-write-guard.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-validate-commit.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-context-monitor.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-context-monitor.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-context-monitor.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "matcher": "config.json",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/mdub/.nvm/versions/node/v24.13.0/bin/node\" \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/gsd-config-reload.js",
+            "timeout": 8
+          }
+        ]
+      }
+    ]
+  },
+  "worktree": {
+    "baseRef": "head"
+  }
+}
