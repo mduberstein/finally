@@ -22,6 +22,16 @@ pins down the JSON shapes that `PLAN.md` leaves open.
   bodies `422` (Pydantic default).
 - `user_id` never appears in any request or response. It is `"default"`
   server-side and invisible to the client.
+- **Rounding.** Money and percentage fields are rounded to 2 decimals, `weight`
+  to 4. Raw prices carried straight from the feed (`price`, `previous_price`,
+  `change` in the watchlist and the SSE stream) are **not** rounded, so format
+  them for display. `change_percent` is rounded to 4 in both places.
+- Any path that is not `/api/*` is served from the frontend's static export at
+  `backend/static/`: real files are served as-is, and anything else falls back
+  to `index.html`, because the frontend is a single route. `/api` is excluded
+  from that fallback, so an unknown API path is a JSON `404` rather than the
+  HTML shell. When the backend runs without a built frontend, non-API paths
+  return `404`.
 
 ## `GET /api/health`
 
@@ -83,7 +93,10 @@ how sparklines accumulate. Label it "since open" in the UI, not "daily".
   price yet, fall back to `avg_cost` so the portfolio never renders as `null`.
 - `weight` is `market_value / total_value`, a fraction in `[0, 1]` — the
   heatmap sizes rectangles by it.
-- `positions` is `[]` when nothing is held.
+- `positions` is `[]` when nothing is held, and is ordered alphabetically by
+  ticker otherwise.
+- `total_unrealized_pnl_percent` is P&L over the cost basis of the holdings, not
+  over `total_value`. With no holdings it is `0.0`, never `null`.
 
 ## `POST /api/portfolio/trade`
 
@@ -93,8 +106,9 @@ Request:
 { "ticker": "AAPL", "quantity": 10, "side": "buy" }
 ```
 
-`side` is `"buy"` or `"sell"`. `quantity` must be `> 0` (422 otherwise).
-`ticker` is upper-cased server-side.
+`side` is `"buy"` or `"sell"` (422 otherwise). `quantity` must be `> 0` (422
+otherwise). `ticker` is upper-cased server-side and must be 1-5 letters, the
+same rule as the watchlist (422 otherwise).
 
 Response `200`:
 
@@ -132,7 +146,7 @@ The message text is read by the LLM and shown to the user, so keep it specific.
 ## `GET /api/portfolio/history`
 
 Optional query param `limit` (default 500, newest N returned in ascending time
-order).
+order). It must be between 1 and 5000; anything else is `422`.
 
 ```json
 {
@@ -170,12 +184,14 @@ Request `{ "ticker": "pypl" }` — upper-cased server-side.
 
 Response `201`: the same object shape as one entry of `GET /api/watchlist`.
 
-- `409` if the ticker is already on the watchlist.
+- `409` if the ticker is already on the watchlist, with
+  `{"detail": "PYPL is already on the watchlist"}`.
 - `422` if the ticker isn't 1-5 letters.
 
 ## `DELETE /api/watchlist/{ticker}`
 
-`204` with no body. `404` if the ticker isn't on the watchlist.
+`204` with no body. The path segment is upper-cased server-side. `404` if the
+ticker isn't on the watchlist, with `{"detail": "PYPL is not on the watchlist"}`.
 
 Removing a ticker does **not** close any position in it.
 

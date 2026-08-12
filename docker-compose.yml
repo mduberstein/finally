@@ -1,0 +1,21 @@
+# Local convenience wrapper, equivalent to the documented docker run.
+# Production is the single container, not compose.
+#   docker compose up --build     then open http://localhost:8000
+#   docker compose down           stops the container, keeps the volume
+
+services:
+  finally:
+    build: .
+    image: finally
+    container_name: finally
+    ports:
+      - "8000:8000"
+    volumes:
+      - finally-data:/app/db
+    env_file: .env
+
+volumes:
+  finally-data:
+    # Pinned so compose shares the volume the start scripts use, instead of
+    # getting a project-prefixed one.
+    name: finally-data

@@ -1,0 +1,63 @@
+# Patterns here are anchored to the build context root, so nested matches need
+# an explicit **/ prefix. backend/README.md is deliberately NOT excluded:
+# pyproject.toml declares readme = "README.md" and the hatchling build reads it.
+
+# Secrets - passed at runtime with --env-file, never baked into an image layer
+.env
+
+# Version control and editor state
+.git
+.github
+.gitignore
+**/.claude
+.claude-plugin
+**/.vscode
+**/.idea
+**/.DS_Store
+
+# Node
+**/node_modules
+**/.next
+**/out
+**/npm-debug.log*
+
+# Python
+**/.venv
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+**/.coverage
+**/htmlcov
+
+# Runtime databases, at any depth - the top-level db/ and the backend/db/ that
+# a local `uv run uvicorn` creates from the relative default DB_PATH.
+# These MUST NOT enter the image: Docker seeds a fresh named volume from the
+# image content at the mount path, so a stray file here becomes the user's
+# starting database instead of a clean seeded one.
+**/db/*.db
+**/db/*.db-wal
+**/db/*.db-shm
+**/db/*.db-journal
+# The whole directory, so no stray file in it can ever reach the image. The
+# runtime path /app/db comes from the volume, not from the build.
+backend/db
+
+# Not needed to build or run the image
+test
+planning
+independent-reviewer
+backend/tests
+backend/archive
+backend/market_data_demo.py
+# A local copy of the frontend export. Stage 1 supplies the real one; letting
+# the host's version in would leave stale files the COPY does not overwrite.
+backend/static
+Dockerfile
+.dockerignore
+docker-compose.yml
+scripts
+README.md
+LICENSE
+CLAUDE.md

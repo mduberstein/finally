@@ -25,10 +25,13 @@ Single Docker container serving everything on port 8000:
 
 ## Quick Start
 
+Creating `.env` is a required first step — `.env` is gitignored, and the
+container is run with `--env-file .env`, so it will not start without one.
+
 ```bash
 # Clone and configure
 cp .env.example .env
-# Add your OPENROUTER_API_KEY to .env
+# Add your OPENROUTER_API_KEY to .env (or set LLM_MOCK=true to skip the LLM)
 
 # Run with Docker
 docker build -t finally .
@@ -36,6 +39,17 @@ docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally
 
 # Open http://localhost:8000
 ```
+
+Or use the start/stop scripts, which wrap the same commands and are safe to run
+twice. Pass `--build` to force a rebuild.
+
+```bash
+./scripts/start_mac.sh          # macOS/Linux    .\scripts\start_windows.ps1
+./scripts/stop_mac.sh           # macOS/Linux    .\scripts\stop_windows.ps1
+```
+
+`docker compose up --build` also works locally. Stopping never removes the
+`finally-data` volume, so the portfolio survives restarts.
 
 ## Environment Variables
 

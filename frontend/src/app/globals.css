@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/*
+ * FinAlly terminal theme.
+ *
+ * The instrument is monospace end to end: every number sits on a grid and
+ * columns align to the decimal. The one humanist face in the product is the
+ * assistant's prose, which is the only place a voice rather than a machine is
+ * speaking.
+ */
+@theme {
+  /* Surfaces. The void shows through 1px gutters between panels, so the
+     terminal reads as one instrument rather than a page of cards. */
+  --color-void: #090c12;
+  --color-panel: #0d1117;
+  --color-raise: #161c28;
+  --color-chat: #16162a;
+  --color-line: #232a38;
+  --color-line-soft: #1a212c;
+
+  /* Ink */
+  --color-ink: #dfe4ec;
+  --color-ink-dim: #8892a4;
+  --color-ink-faint: #59616f;
+
+  /* Brand */
+  --color-accent: #ecad0a;
+  --color-blue: #209dd7;
+  --color-purple: #753991;
+
+  /* Semantics */
+  --color-up: #21c07a;
+  --color-down: #f0576b;
+
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono",
+    "Roboto Mono", Menlo, Consolas, monospace;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  --text-micro: 0.625rem;
+  --text-micro--line-height: 1rem;
+  --text-data: 0.6875rem;
+  --text-data--line-height: 1rem;
+  --text-ui: 0.75rem;
+  --text-ui--line-height: 1.1rem;
+  --text-prose: 0.8125rem;
+  --text-prose--line-height: 1.35rem;
+  --text-figure: 0.9375rem;
+  --text-figure--line-height: 1.2rem;
+  --text-hero: 1.375rem;
+  --text-hero--line-height: 1.5rem;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-data);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Uppercase micro-label used for every panel and column heading. */
+.label {
+  font-size: var(--text-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-dim);
+}
+
+/*
+ * Price flash. The background is painted instantly on a tick, then the class
+ * is removed and the transition fades it back out over ~500ms. Only the cell
+ * repaints, never the row or the page.
+ */
+.flashable {
+  transition: background-color 460ms ease-out;
+}
+
+.flash-up {
+  background-color: color-mix(in srgb, var(--color-up) 24%, transparent);
+  transition: none;
+}
+
+.flash-down {
+  background-color: color-mix(in srgb, var(--color-down) 24%, transparent);
+  transition: none;
+}
+
+/* The selection rail: one symbol threaded through every panel that shows it. */
+.rail {
+  box-shadow: inset 2px 0 0 var(--color-accent);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-faint);
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flashable,
+  .flash-up,
+  .flash-down {
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

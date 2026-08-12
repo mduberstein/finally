@@ -1,0 +1,17 @@
+{
+  "name": "finally-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "End-to-end suite for FinAlly, run against the production container.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
