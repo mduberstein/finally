@@ -90,52 +90,54 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MARKET-01 | TBD | Pending |
-| MARKET-02 | TBD | Pending |
-| MARKET-03 | TBD | Pending |
-| MARKET-04 | TBD | Pending |
-| PORT-01 | TBD | Pending |
-| PORT-02 | TBD | Pending |
-| PORT-03 | TBD | Pending |
-| PORT-04 | TBD | Pending |
-| PORT-05 | TBD | Pending |
-| PORT-06 | TBD | Pending |
-| PORT-07 | TBD | Pending |
-| PORT-08 | TBD | Pending |
-| PORT-09 | TBD | Pending |
-| PORT-10 | TBD | Pending |
-| WATCH-01 | TBD | Pending |
-| WATCH-02 | TBD | Pending |
-| WATCH-03 | TBD | Pending |
-| WATCH-04 | TBD | Pending |
-| WATCH-05 | TBD | Pending |
-| CHAT-01 | TBD | Pending |
-| CHAT-02 | TBD | Pending |
-| CHAT-03 | TBD | Pending |
-| CHAT-04 | TBD | Pending |
-| CHAT-05 | TBD | Pending |
-| CHAT-06 | TBD | Pending |
-| CHAT-07 | TBD | Pending |
-| CHAT-08 | TBD | Pending |
-| CHAT-09 | TBD | Pending |
-| UI-01 | TBD | Pending |
-| UI-02 | TBD | Pending |
-| UI-03 | TBD | Pending |
-| UI-04 | TBD | Pending |
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
+| MARKET-01 | Phase 1 | Pending |
+| MARKET-02 | Phase 1 | Pending |
+| MARKET-03 | Phase 1 | Pending |
+| MARKET-04 | Phase 1 | Pending |
+| PORT-01 | Phase 2 | Pending |
+| PORT-02 | Phase 2 | Pending |
+| PORT-03 | Phase 2 | Pending |
+| PORT-04 | Phase 2 | Pending |
+| PORT-05 | Phase 2 | Pending |
+| PORT-06 | Phase 2 | Pending |
+| PORT-07 | Phase 2 | Pending |
+| PORT-08 | Phase 3 | Pending |
+| PORT-09 | Phase 3 | Pending |
+| PORT-10 | Phase 2 | Pending |
+| WATCH-01 | Phase 1 | Pending |
+| WATCH-02 | Phase 3 | Pending |
+| WATCH-03 | Phase 3 | Pending |
+| WATCH-04 | Phase 3 | Pending |
+| WATCH-05 | Phase 3 | Pending |
+| CHAT-01 | Phase 4 | Pending |
+| CHAT-02 | Phase 4 | Pending |
+| CHAT-03 | Phase 4 | Pending |
+| CHAT-04 | Phase 4 | Pending |
+| CHAT-05 | Phase 4 | Pending |
+| CHAT-06 | Phase 4 | Pending |
+| CHAT-07 | Phase 4 | Pending |
+| CHAT-08 | Phase 4 | Pending |
+| CHAT-09 | Phase 4 | Pending |
+| UI-01 | Phase 1 | Pending |
+| UI-02 | Phase 3 | Pending |
+| UI-03 | Phase 2 | Pending |
+| UI-04 | Phase 3 | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 5 | Pending |
+| INFRA-03 | Phase 5 | Pending |
+| INFRA-04 | Phase 5 | Pending |
+| TEST-01 | Phase 2 | Pending |
+| TEST-02 | Phase 4 | Pending |
+| TEST-03 | Phase 3 | Pending |
+| TEST-04 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 38 total
-- Mapped to phases: 0
-- Unmapped: 38 ⚠️ (roadmap creation pending)
+- v1 requirements: 40 total (MARKET 4, PORT 10, WATCH 5, CHAT 9, UI 4, INFRA 4, TEST 4)
+- Mapped to phases: 40 ✓
+- Unmapped: 0
+
+*Note: the initial draft of this file stated "38 total"; the enumerated list has always contained 40 requirements. Corrected during roadmap creation — no requirements were added or removed.*
 
 ---
 *Requirements defined: 2026-08-12*
-*Last updated: 2026-08-12 after initial definition*
+*Last updated: 2026-08-12 after roadmap creation (traceability mapped, count corrected)*
