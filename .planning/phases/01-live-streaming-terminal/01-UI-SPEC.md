@@ -1,7 +1,7 @@
 ---
 phase: 1
 slug: live-streaming-terminal
-status: draft
+status: approved
 shadcn_initialized: false
 preset: neutral
 created: 2026-08-13
@@ -116,20 +116,32 @@ Accent Yellow `#ecad0a` and Purple Secondary `#753991` (both fixed by CLAUDE.md'
 > Empty-state and error-state COPY live in `## Copywriting Contract` above — this section covers
 > state coverage and REFERENCES those rows rather than restating the copy (de-dup).
 
-Applicable state considerations resolved: 8 covered, 2 backstop, 0 unresolved
+> Element classification and applicable-category list were produced by running the compiled
+> `ui-consideration-probe.cjs` engine (not hand-picked) on three elements: watchlist grid
+> (list-collection), connection status indicator (interactive-control ∪ static-content — the
+> heuristic's initial `static-content`-only classification was corrected via the propose-then-confirm
+> `elements` override to also raise its `loading`/`error` categories, since MARKET-03's three-state
+> dot is exactly a loading/error indicator), and header (nav). 15 applicable considerations resulted.
+
+Applicable state considerations resolved: 13 covered, 2 backstop, 0 unresolved
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
-| empty | watchlist grid (list-collection) | 🧪 backstop | Grid renders the "Empty state heading/body" copy above if the API returns zero tickers; not expected given seeded default, held out as a backstop test |
-| loading | watchlist grid (list-collection) | ✅ covered | Grid shows 10 skeleton placeholder rows until the first SSE snapshot arrives, then replaces them with live ticker rows |
-| error | watchlist grid (list-collection) | ✅ covered | On stream failure, rows keep displaying their last known price (never blanked or cleared); the header connection dot is the sole error surface |
-| populated | watchlist grid (list-collection) | ✅ covered | Happy path: 10 rows (AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX), each showing ticker, price, % change, and flashing on update |
-| partial | watchlist grid (list-collection) | 🧪 backstop | A ticker row shows a "—" placeholder for price/% change until that specific ticker's first tick arrives over SSE, rather than a blank or zero value |
-| zero-one-many | watchlist grid (list-collection) | ✅ covered | Not applicable this phase: count is fixed at exactly 10 seeded tickers (WATCH-01); variable add/remove counts arrive with WATCH-02/03 in Phase 3 |
-| overflow | watchlist grid (list-collection) | ✅ covered | Price and % change render in fixed-width `tabular-nums` columns; ticker symbols are ≤5 chars — no wrapping or truncation needed |
-| loading | connection status indicator (interactive-control) | ✅ covered | Dot renders yellow `#eab308` with label "Reconnecting" while the SSE connection is retrying, per MARKET-03 |
-| error | connection status indicator (interactive-control) | ✅ covered | Dot renders red `#dc2626` with label "Disconnected" when the stream is down; recovers to green automatically without user action once the backend returns |
-| overflow | header (nav) | ✅ covered | Full tablet-width responsive behavior (UI-04) is explicit Phase 3 scope; Phase 1 header targets desktop viewports (≥1280px) only |
+| empty | watchlist grid (list-collection) | 🧪 backstop | If the watchlist API/SSE returns zero tickers (not expected given the seeded default of 10 per WATCH-01/INFRA-01), the grid renders the empty-state heading "No tickers being tracked" and body "Your watchlist will populate automatically when the app starts." instead of an empty table |
+| loading | watchlist grid (list-collection) | ✅ covered | Before the first SSE snapshot arrives, the watchlist grid renders 10 skeleton placeholder rows (shadcn `skeleton` component) matching the final row layout, replaced by live ticker rows once data arrives |
+| error | watchlist grid (list-collection) | ✅ covered | On SSE stream failure, watchlist rows continue displaying their last known price/% change (never cleared or blanked); the header connection dot turning red with label "Disconnected" is the sole error surface — no per-row error state exists |
+| populated | watchlist grid (list-collection) | ✅ covered | In the populated state the grid shows exactly 10 rows (AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX), each displaying ticker, live price, and % change, with brief green/red background flashes on price ticks |
+| partial | watchlist grid (list-collection) | 🧪 backstop | A ticker row shows a "—" placeholder in the price and % change cells until that specific ticker's first SSE tick arrives, rather than a blank cell or a misleading zero value |
+| overflow | watchlist grid (list-collection) | ✅ covered | Price and % change render in fixed-width `tabular-nums` columns sized for the largest expected value; ticker symbols are ≤5 characters and require no truncation or wrapping in this phase |
+| zero-one-many | watchlist grid (list-collection) | ✅ covered | The watchlist always renders exactly 10 rows in Phase 1 (fixed seeded ticker count per WATCH-01); no zero/one/variable-count layout behavior is required until watchlist curation (WATCH-02/03) ships in Phase 3 |
+| loading | connection status indicator (interactive-control) | ✅ covered | While the SSE connection is retrying, the header connection dot renders yellow `#eab308` with the text label "Reconnecting" |
+| error | connection status indicator (interactive-control) | ✅ covered | When the stream is down, the header connection dot renders red `#dc2626` with the text label "Disconnected", and recovers to green `#16a34a` with label "Connected" automatically once the backend returns, with no user action required |
+| overflow | connection status indicator (static-content) | ✅ covered | The connection status label is always one of three fixed short strings ("Connected" / "Reconnecting" / "Disconnected"); no dynamic or user-generated content exists that could overflow the header's connection-status area in Phase 1 |
+| long-text | connection status indicator (static-content) | ✅ covered | Same fixed 3-string enum as the overflow consideration above — no long-text handling is required for the connection status label |
+| loading | header (nav) | ✅ covered | The header shell (wordmark) has no async loading state of its own; the only dynamic content inside it is the connection status indicator, whose loading state is covered separately above |
+| error | header (nav) | ✅ covered | The header shell has no independent error state of its own; the connection status indicator contained within it is the sole error surface, covered separately above |
+| overflow | header (nav) | ✅ covered | Header layout targets desktop viewports (≥1280px) only in Phase 1; full tablet-width responsive behavior (UI-04) is explicit Phase 3 scope, so no overflow/wrap handling is required for the header bar this phase |
+| long-text | header (nav) | ✅ covered | The header contains only the fixed wordmark "FinAlly" and the connection status label (drawn from the same fixed 3-string enum); no user-generated or variable-length text exists that requires long-text handling in Phase 1 |
 
 <!-- Status vocabulary (locked by probe-core projectTruths):
      ✅ covered   → a plain truth string lifted into must_haves.truths
@@ -152,11 +164,11 @@ No third-party registries declared for this phase.
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-08-13
