@@ -30,7 +30,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Prices update continuously without a page reload; each change briefly flashes green on an uptick or red on a downtick and fades back within about half a second
   3. The header connection dot reads green while the stream is healthy, yellow while reconnecting, and red when the stream is down — and recovers to green on its own after the backend comes back
   4. Starting the app against an empty `db/` directory creates and seeds the database automatically; restarting against an existing one reuses it without wiping data
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Walking-skeleton tracer: seeded SQLite through FastAPI to a streaming browser page
+- [ ] 01-02-PLAN.md — Dark terminal theme, Header/Watchlist/WatchlistRow decomposition, frontend test runner
+- [ ] 01-03-PLAN.md — Price flash green on uptick, red on downtick, fading over ~500ms
+- [ ] 01-04-PLAN.md — Three-state connection indicator with automatic recovery
 **UI hint**: yes
 
 ### Phase 2: Trading & Portfolio
@@ -94,7 +100,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Live Streaming Terminal | 0/TBD | Not started | - |
+| 1. Live Streaming Terminal | 0/4 | Planned | - |
 | 2. Trading & Portfolio | 0/TBD | Not started | - |
 | 3. Visual Terminal & Watchlist Control | 0/TBD | Not started | - |
 | 4. AI Copilot | 0/TBD | Not started | - |
