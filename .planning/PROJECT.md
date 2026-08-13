@@ -1,0 +1,96 @@
+# FinAlly — AI Trading Workstation
+
+## What This Is
+
+FinAlly is a Bloomberg-terminal-style AI trading workstation: a single-container web app that streams live simulated market data, lets a user trade a virtual $10,000 portfolio, and includes an AI chat copilot (via OpenRouter/Cerebras) that can analyze the portfolio and execute trades on the user's behalf. It's the capstone project for an agentic AI coding course, built end-to-end by coding agents.
+
+## Core Value
+
+A user can watch live prices stream, trade a simulated portfolio, and have an AI assistant execute trades and manage the watchlist through natural language — all in one fluid, visually polished terminal-style interface.
+
+## Requirements
+
+### Validated
+
+- ✓ Market data abstraction layer (simulator + Massive REST client behind a shared interface) — existing
+- ✓ In-memory price cache with change/direction computation — existing
+- ✓ Resilient background polling feed (transient-error tolerance, auth fallback, rate-limit backoff) — existing
+- ✓ SSE stream router factory for `/api/stream/prices` (built but not yet wired into a running app) — existing
+
+### Active
+
+- [ ] FastAPI app assembly: lifespan wiring of `MarketFeed` + `PriceCache` into a running app
+- [ ] SQLite schema + lazy init/seed (users_profile, watchlist, positions, trades, portfolio_snapshots, chat_messages)
+- [ ] Portfolio API: `GET /api/portfolio`, `POST /api/portfolio/trade`, `GET /api/portfolio/history`
+- [ ] Watchlist API: `GET/POST /api/watchlist`, `DELETE /api/watchlist/{ticker}`
+- [ ] Trade execution logic: market orders, instant fill, cash/position validation, avg cost tracking
+- [ ] Portfolio snapshot background task (every 30s + immediately after each trade)
+- [ ] LLM chat integration: `POST /api/chat` via LiteLLM → OpenRouter (Cerebras, `gpt-oss-120b`), structured output schema, auto-executed trades/watchlist changes
+- [ ] `LLM_MOCK` deterministic mode for testing
+- [ ] Next.js TypeScript frontend (static export) — watchlist grid, sparkline mini-charts, main chart, portfolio heatmap, P&L chart, positions table, trade bar, AI chat panel, header
+- [ ] Price flash animations (green/red, fade ~500ms) driven by the SSE stream
+- [ ] Connection status indicator (green/yellow/red)
+- [ ] Dark terminal visual theme (colors per PLAN.md) built with Tailwind CSS
+- [ ] Multi-stage Dockerfile (Node build → Python runtime) serving static frontend + API on port 8000
+- [ ] `docker-compose.yml` convenience wrapper
+- [ ] Start/stop scripts (mac + windows)
+- [ ] Backend unit tests: portfolio math, LLM structured-output parsing, API routes
+- [ ] Frontend unit tests: component rendering, price flash, watchlist CRUD, chat rendering
+- [ ] Playwright E2E suite in `test/` with `docker-compose.test.yml`, `LLM_MOCK=true` scenarios
+
+### Out of Scope
+
+- Real Massive/Polygon market data — no Massive API key available; simulator-only for this build. The Massive client stays in the codebase as an alternate implementation but isn't exercised in production for now
+- Cloud deployment (Terraform/App Runner) — Docker-only for this build; the `deploy/` stretch goal from PLAN.md is deferred
+- Multi-user auth/login — explicitly zero-auth, single hardcoded `user_id="default"` per PLAN.md
+- Limit orders / order book — market orders only, per PLAN.md's simplicity rationale
+- Trade confirmation dialogs — instant-fill by design, including LLM-initiated trades
+
+## Context
+
+- This is a capstone project for an agentic AI coding course; the whole app is meant to be built by coding agents to demonstrate orchestration.
+- Backend is a `uv`-managed Python 3.12+ project (`backend/pyproject.toml`, `backend/uv.lock`). FastAPI 0.141.1, sse-starlette, httpx, pydantic 2.13.4 already in use.
+- The market data layer is done and tested (`backend/app/market/*`, `backend/tests/market/*`) — see `.planning/codebase/ARCHITECTURE.md` and `planning/MARKET_DATA_SUMMARY.md` for full detail. Downstream code must always read prices via `PriceCache`, never call a source's `fetch()` directly (documented anti-pattern in the codebase map).
+- No `frontend/` directory exists yet — this build creates it from scratch as a Next.js static export.
+- No FastAPI app entrypoint, database, or `/api/*` routes exist yet beyond the market data package.
+- `.env` at project root already contains a working `OPENROUTER_API_KEY` per user confirmation.
+- LLM integration must use the `cerebras-inference` skill: LiteLLM → OpenRouter → `openrouter/openai/gpt-oss-120b` on Cerebras inference, with structured outputs.
+
+## Constraints
+
+- **Tech stack**: Next.js (static export) + FastAPI (Python/uv) + SQLite, single Docker container on port 8000 — fixed by PLAN.md, not open for revisiting
+- **Market data source**: Simulator only for this build — no Massive API key available
+- **Auth**: None — single hardcoded `user_id="default"` throughout
+- **Order types**: Market orders only, instant fill, no fees, no confirmation dialogs
+- **LLM provider**: OpenRouter via LiteLLM, Cerebras inference, `gpt-oss-120b`, structured outputs — fixed by PLAN.md
+- **Deployment**: Docker only for this build; cloud/Terraform deploy explicitly out of scope
+
+## Key Decisions
+
+| Decision | Rationale | Outcome |
+|----------|-----------|---------|
+| Build the entire remaining platform in one milestone, not a narrower slice | User wants full end-to-end coverage of PLAN.md in this pass | — Pending |
+| Simulator-only market data, no Massive key | User doesn't have a Massive API key; PLAN.md already treats the simulator as the recommended default | — Pending |
+| Skip cloud deployment (Terraform/App Runner) | Explicit stretch goal in PLAN.md; user wants Docker-only for this build | — Pending |
+| Use the real `OPENROUTER_API_KEY` from the start (not `LLM_MOCK`) | Key already present in `.env` per user | — Pending |
+| AI Integration Phase workflow toggle left off | User's explicit choice in `/gsd-settings`; framework already fixed by PLAN.md (LiteLLM/OpenRouter/Cerebras), so framework-selection research isn't needed | — Pending |
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
+---
+*Last updated: 2026-08-12 after initialization*
