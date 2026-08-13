@@ -157,17 +157,18 @@
       "Read(.planning/*)",
       "Edit(.planning/*)",
       "Read(STATE.md)",
-      "Edit(STATE.md)"
+      "Edit(STATE.md)",
+      "Skill(fewer-permission-prompts)",
+      "Bash(grep -E '\\(^|; |&& |\\\\| \\)git ' __TRACKED_VAR__/bash_cmds.txt)",
+      "Bash(grep -oE 'uv run [a-zA-Z0-9_./ -]*' __TRACKED_VAR__/bash_cmds.txt)",
+      "Skill(gsd-plan-phase)",
+      "Skill(update-config)"
     ],
     "deny": [
       "Read(.env)",
       "Read(.env.*)",
       "Read(.secrets)"
     ]
-  },
-  "sandbox": {
-    "enabled": true,
-    "autoAllowBashIfSandboxed": true
   },
   "hooks": {
     "SessionStart": [
@@ -350,5 +351,9 @@
   },
   "worktree": {
     "baseRef": "head"
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
   }
 }
