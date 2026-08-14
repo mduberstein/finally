@@ -211,5 +211,6 @@ __marimo__/
 # FinAlly runtime database (db/.gitkeep keeps the mount-point directory tracked)
 db/finally.db
 
-# FinAlly frontend build output
-frontend/out/
+# The Python packaging `lib/` rule above would otherwise also swallow the
+# Next.js convention directory frontend/lib/ (types.ts, usePriceStream.ts).
+!frontend/lib/
