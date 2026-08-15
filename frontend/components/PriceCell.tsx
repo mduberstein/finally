@@ -34,9 +34,8 @@ export function PriceCell({ price, changePercent, direction }: PriceCellProps) {
   // external side effect, so it belongs in an effect rather than render.
   useEffect(() => {
     if (direction == null) return;
-    const tick = { direction } as PriceTick;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizes with wall-clock time, an external source, not derived from props alone
-    setFlash((prev) => nextFlashState(prev, tick, Date.now()));
+    setFlash((prev) => nextFlashState(prev, direction, Date.now()));
   }, [direction, price]);
 
   // Clear the flash once its window elapses so a ticker that stops moving

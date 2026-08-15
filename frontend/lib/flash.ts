@@ -18,11 +18,11 @@ export interface FlashState {
  */
 export function nextFlashState(
   prev: FlashState | null,
-  tick: PriceTick,
+  direction: PriceTick["direction"],
   now: number,
 ): FlashState | null {
-  if (tick.direction === "flat") return prev;
-  return { direction: tick.direction, startedAt: now };
+  if (direction === "flat") return prev;
+  return { direction, startedAt: now };
 }
 
 /** True while the flash tint should still be visible. */
