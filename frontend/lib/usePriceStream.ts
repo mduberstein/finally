@@ -37,7 +37,13 @@ export function usePriceStream(): PriceStreamState {
     source.onerror = () => setConnection((state) => reduceConnection(state, { kind: "error" }, Date.now()));
 
     source.addEventListener("price", (event: MessageEvent<string>) => {
-      const tick = JSON.parse(event.data) as PriceTick;
+      let tick: PriceTick;
+      try {
+        tick = JSON.parse(event.data) as PriceTick;
+      } catch {
+        setConnection((state) => reduceConnection(state, { kind: "error" }, Date.now()));
+        return;
+      }
       setPrices((current) => ({ ...current, [tick.ticker]: tick }));
       setConnection((state) => reduceConnection(state, { kind: "message" }, Date.now()));
     });
