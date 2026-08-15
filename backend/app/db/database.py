@@ -101,7 +101,7 @@ def watchlist_tickers() -> list[str]:
     """
     with closing(connect()) as conn:
         rows = conn.execute(
-            "SELECT ticker FROM watchlist WHERE user_id = ? ORDER BY added_at, ticker",
+            "SELECT ticker FROM watchlist WHERE user_id = ? ORDER BY rowid",
             (DEFAULT_USER_ID,),
         ).fetchall()
     return [row["ticker"] for row in rows]
