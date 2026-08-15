@@ -1,16 +1,5 @@
+import { formatPercent, formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const EM_DASH = "—";
-
-function formatPrice(value: number | null | undefined): string {
-  return value == null ? EM_DASH : value.toFixed(2);
-}
-
-function formatPercent(value: number | null | undefined): string {
-  if (value == null) return EM_DASH;
-  const sign = value > 0 ? "+" : "";
-  return `${sign}${value.toFixed(2)}%`;
-}
 
 interface WatchlistRowProps {
   ticker: string;
