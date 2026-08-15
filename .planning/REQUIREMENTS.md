@@ -11,7 +11,7 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 
 - [ ] **MARKET-01**: Watchlist prices update live in the UI via the SSE stream at `/api/stream/prices`, sourced from the existing `PriceCache`/`MarketFeed`
 - [ ] **MARKET-02**: Prices flash green on an uptick and red on a downtick, fading over ~500ms
-- [ ] **MARKET-03**: A connection status indicator in the header shows green (connected), yellow (reconnecting), or red (disconnected)
+- [x] **MARKET-03**: A connection status indicator in the header shows green (connected), yellow (reconnecting), or red (disconnected)
 - [ ] **MARKET-04**: FastAPI app starts `MarketFeed` with the simulator source on lifespan startup and stops it cleanly on shutdown
 
 ### Portfolio
@@ -92,7 +92,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | MARKET-01 | Phase 1 | Pending |
 | MARKET-02 | Phase 1 | Pending |
-| MARKET-03 | Phase 1 | Pending |
+| MARKET-03 | Phase 1 | Complete |
 | MARKET-04 | Phase 1 | Pending |
 | PORT-01 | Phase 2 | Pending |
 | PORT-02 | Phase 2 | Pending |
