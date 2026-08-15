@@ -46,12 +46,14 @@ export function Watchlist({ entries, prices, selectedTicker, onSelectTicker }: W
             const live = prices[entry.ticker];
             const price = live?.price ?? entry.price;
             const changePercent = live?.change_percent ?? entry.change_percent;
+            const direction = live?.direction ?? entry.direction;
             return (
               <WatchlistRow
                 key={entry.ticker}
                 ticker={entry.ticker}
                 price={price}
                 changePercent={changePercent}
+                direction={direction}
                 selected={entry.ticker === selectedTicker}
                 onSelect={() => onSelectTicker(entry.ticker)}
               />
