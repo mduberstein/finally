@@ -1,10 +1,12 @@
-import { formatPercent, formatPrice } from "@/lib/format";
+import { PriceCell } from "@/components/PriceCell";
+import type { PriceTick } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface WatchlistRowProps {
   ticker: string;
   price?: number | null;
   changePercent?: number | null;
+  direction?: PriceTick["direction"] | null;
   selected?: boolean;
   onSelect?: () => void;
 }
@@ -16,6 +18,7 @@ export function WatchlistRow({
   ticker,
   price,
   changePercent,
+  direction = null,
   selected = false,
   onSelect,
 }: WatchlistRowProps) {
@@ -39,10 +42,7 @@ export function WatchlistRow({
       )}
     >
       <span className="text-label text-foreground">{ticker}</span>
-      <span className="numeric text-display text-right text-foreground">{formatPrice(price)}</span>
-      <span className="numeric text-body text-right text-muted-foreground">
-        {formatPercent(changePercent)}
-      </span>
+      <PriceCell price={price ?? null} changePercent={changePercent ?? null} direction={direction} />
     </div>
   );
 }
