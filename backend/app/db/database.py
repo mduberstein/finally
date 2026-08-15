@@ -11,6 +11,7 @@ ones, leaving existing rows untouched.
 import os
 import sqlite3
 import uuid
+from contextlib import closing
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -71,11 +72,10 @@ def initialize() -> None:
     path = db_path()
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with connect() as conn:
+    with closing(connect()) as conn, conn:
         conn.executescript(_SCHEMA_PATH.read_text())
         _seed_user_profile(conn)
         _seed_watchlist(conn)
-        conn.commit()
 
 
 def _seed_user_profile(conn: sqlite3.Connection) -> None:
@@ -99,7 +99,7 @@ def watchlist_tickers() -> list[str]:
     This is the callable handed to `MarketFeed` — it is re-read on every
     poll so watchlist changes take effect without restarting the feed.
     """
-    with connect() as conn:
+    with closing(connect()) as conn:
         rows = conn.execute(
             "SELECT ticker FROM watchlist WHERE user_id = ? ORDER BY added_at, ticker",
             (DEFAULT_USER_ID,),
