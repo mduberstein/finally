@@ -6,6 +6,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.concurrency import run_in_threadpool
 
 from app import db
 from app.market import MarketFeed, PriceCache, PriceUpdate, create_source
@@ -43,11 +44,8 @@ async def health() -> dict:
 
 @app.get("/api/watchlist")
 async def watchlist() -> list[dict]:
-    entries = []
-    for ticker in db.watchlist_tickers():
-        update = cache.get(ticker)
-        entries.append(_watchlist_entry(ticker, update))
-    return entries
+    tickers = await run_in_threadpool(db.watchlist_tickers)
+    return [_watchlist_entry(ticker, cache.get(ticker)) for ticker in tickers]
 
 
 def _watchlist_entry(ticker: str, update: PriceUpdate | None) -> dict:
