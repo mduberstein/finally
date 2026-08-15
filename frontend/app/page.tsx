@@ -13,9 +13,15 @@ export default function Home() {
 
   useEffect(() => {
     fetch("/api/watchlist")
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) throw new Error(`watchlist fetch failed: ${response.status}`);
+        return response.json();
+      })
       .then((entries: WatchlistEntry[]) => setWatchlist(entries))
-      .catch(() => setWatchlist([]));
+      .catch((error: unknown) => {
+        console.error(error);
+        setWatchlist([]);
+      });
   }, []);
 
   return (
