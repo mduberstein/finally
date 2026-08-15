@@ -173,3 +173,7 @@ None - no external service configuration required.
 ---
 *Phase: 01-live-streaming-terminal*
 *Completed: 2026-08-15*
+
+## Self-Check: PASSED
+
+All claimed files verified present: `frontend/lib/format.ts`, `frontend/lib/format.test.ts`, `frontend/vitest.config.ts`, `.planning/phases/01-live-streaming-terminal/01-02-SUMMARY.md`. All claimed commit hashes verified present in `git log`: `a206605`, `ba26257`, `0bcd0ae`, `dfb16cb`, `2e7df21`.
