@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The header connection dot reads green while the stream is healthy, yellow while reconnecting, and red when the stream is down — and recovers to green on its own after the backend comes back
   4. Starting the app against an empty `db/` directory creates and seeds the database automatically; restarting against an existing one reuses it without wiping data
 
-**Plans**: 2/4 plans executed
+**Plans**: 4/4 plans executed
 
 Plans:
 **Wave 1**
@@ -47,8 +47,8 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-03-PLAN.md — Price flash green on uptick, red on downtick, fading over ~500ms
-- [ ] 01-04-PLAN.md — Three-state connection indicator with automatic recovery
+- [x] 01-03-PLAN.md — Price flash green on uptick, red on downtick, fading over ~500ms
+- [x] 01-04-PLAN.md — Three-state connection indicator with automatic recovery
 
 **UI hint**: yes
 
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Live Streaming Terminal | 2/4 | In Progress|  |
+| 1. Live Streaming Terminal | 4/4 | In Progress|  |
 | 2. Trading & Portfolio | 0/TBD | Not started | - |
 | 3. Visual Terminal & Watchlist Control | 0/TBD | Not started | - |
 | 4. AI Copilot | 0/TBD | Not started | - |
