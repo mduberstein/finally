@@ -9,10 +9,10 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 
 ### Market Data & Streaming
 
-- [ ] **MARKET-01**: Watchlist prices update live in the UI via the SSE stream at `/api/stream/prices`, sourced from the existing `PriceCache`/`MarketFeed`
-- [ ] **MARKET-02**: Prices flash green on an uptick and red on a downtick, fading over ~500ms
+- [x] **MARKET-01**: Watchlist prices update live in the UI via the SSE stream at `/api/stream/prices`, sourced from the existing `PriceCache`/`MarketFeed`
+- [x] **MARKET-02**: Prices flash green on an uptick and red on a downtick, fading over ~500ms
 - [x] **MARKET-03**: A connection status indicator in the header shows green (connected), yellow (reconnecting), or red (disconnected)
-- [ ] **MARKET-04**: FastAPI app starts `MarketFeed` with the simulator source on lifespan startup and stops it cleanly on shutdown
+- [x] **MARKET-04**: FastAPI app starts `MarketFeed` with the simulator source on lifespan startup and stops it cleanly on shutdown
 
 ### Portfolio
 
@@ -29,7 +29,7 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 
 ### Watchlist
 
-- [ ] **WATCH-01**: User sees 10 default watchlist tickers on first launch (AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX)
+- [x] **WATCH-01**: User sees 10 default watchlist tickers on first launch (AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX)
 - [ ] **WATCH-02**: User can add a ticker to the watchlist
 - [ ] **WATCH-03**: User can remove a ticker from the watchlist
 - [ ] **WATCH-04**: Each watchlist row shows a sparkline mini-chart accumulated from the SSE stream since page load
@@ -49,14 +49,14 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 
 ### Frontend & Visual Design
 
-- [ ] **UI-01**: Dark trading-terminal visual theme (near-black backgrounds, muted borders, brand accent colors) applied consistently across the app
+- [x] **UI-01**: Dark trading-terminal visual theme (near-black backgrounds, muted borders, brand accent colors) applied consistently across the app
 - [ ] **UI-02**: Layout includes watchlist panel, main chart area, portfolio heatmap, P&L chart, positions table, trade bar, AI chat panel, and header — all visible without excess scrolling on a wide desktop screen
 - [ ] **UI-03**: Trade bar lets the user enter ticker/quantity and submit buy or sell with one click
 - [ ] **UI-04**: App is usable (not broken) on a tablet-width viewport, optimized for desktop
 
 ### Infrastructure & Deployment
 
-- [ ] **INFRA-01**: SQLite database lazily initializes schema and seeds default data on first run if the DB file doesn't exist
+- [x] **INFRA-01**: SQLite database lazily initializes schema and seeds default data on first run if the DB file doesn't exist
 - [ ] **INFRA-02**: Single multi-stage Dockerfile builds the Next.js static export and the FastAPI backend into one image serving port 8000
 - [ ] **INFRA-03**: `docker-compose.yml` and `scripts/start_mac.sh` / `scripts/stop_mac.sh` (and Windows equivalents) let the user launch/stop the app with one command
 - [ ] **INFRA-04**: SQLite file persists across container restarts via a volume mount at `db/finally.db`
@@ -90,10 +90,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MARKET-01 | Phase 1 | Pending |
-| MARKET-02 | Phase 1 | Pending |
+| MARKET-01 | Phase 1 | Complete |
+| MARKET-02 | Phase 1 | Complete |
 | MARKET-03 | Phase 1 | Complete |
-| MARKET-04 | Phase 1 | Pending |
+| MARKET-04 | Phase 1 | Complete |
 | PORT-01 | Phase 2 | Pending |
 | PORT-02 | Phase 2 | Pending |
 | PORT-03 | Phase 2 | Pending |
@@ -104,7 +104,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PORT-08 | Phase 3 | Pending |
 | PORT-09 | Phase 3 | Pending |
 | PORT-10 | Phase 2 | Pending |
-| WATCH-01 | Phase 1 | Pending |
+| WATCH-01 | Phase 1 | Complete |
 | WATCH-02 | Phase 3 | Pending |
 | WATCH-03 | Phase 3 | Pending |
 | WATCH-04 | Phase 3 | Pending |
@@ -118,11 +118,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAT-07 | Phase 4 | Pending |
 | CHAT-08 | Phase 4 | Pending |
 | CHAT-09 | Phase 4 | Pending |
-| UI-01 | Phase 1 | Pending |
+| UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 3 | Pending |
 | UI-03 | Phase 2 | Pending |
 | UI-04 | Phase 3 | Pending |
-| INFRA-01 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 5 | Pending |
 | INFRA-03 | Phase 5 | Pending |
 | INFRA-04 | Phase 5 | Pending |
