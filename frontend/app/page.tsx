@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
+import { PositionsTable } from "@/components/PositionsTable";
 import { TradeBar } from "@/components/TradeBar";
 import { Watchlist } from "@/components/Watchlist";
-import { derivePortfolioValue } from "@/lib/portfolio";
+import { derivePortfolioValue, derivePositionRows } from "@/lib/portfolio";
 import { usePriceStream } from "@/lib/usePriceStream";
 import type { PortfolioSnapshot, WatchlistEntry } from "@/lib/types";
 
@@ -51,6 +52,11 @@ export default function Home() {
     [portfolio, prices],
   );
 
+  const positionRows = useMemo(
+    () => derivePositionRows(portfolio, prices),
+    [portfolio, prices],
+  );
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header status={status} cash={cash} totalValue={totalValue} />
@@ -65,6 +71,7 @@ export default function Home() {
           selectedTicker={selectedTicker}
           onSelectTicker={setSelectedTicker}
         />
+        <PositionsTable rows={positionRows} />
       </main>
     </div>
   );
