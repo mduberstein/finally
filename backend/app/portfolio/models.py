@@ -33,6 +33,25 @@ class TradeRejected(Exception):  # noqa: N818 -- plan-specified name, not an Err
         raise NotImplementedError
 
 
+class InvalidTradeError(TradeRejected):
+    """Raised when `side` or `quantity` fails validation before any write.
+
+    `execute_trade` is the shared domain entry point future callers (e.g.
+    Phase 4's LLM-initiated trades) will call directly, bypassing
+    `TradeRequest`'s Pydantic constraints -- so it validates its own
+    invariants rather than trusting every caller to re-derive them.
+    """
+
+    code = "invalid_trade"
+
+    def __init__(self, message: str) -> None:
+        self.message = message
+        super().__init__(message)
+
+    def detail(self) -> dict:
+        return {"code": self.code, "message": self.message}
+
+
 class UntradableTickerError(TradeRejected):
     """Raised when the ticker has no entry in `PriceCache` (D-02)."""
 

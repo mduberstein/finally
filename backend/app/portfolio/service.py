@@ -16,6 +16,7 @@ from app.market.cache import PriceCache
 from .models import (
     InsufficientCashError,
     InsufficientSharesError,
+    InvalidTradeError,
     TradeResult,
     UntradableTickerError,
 )
@@ -26,9 +27,16 @@ def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) ->
 
     `quantity` is typed `float` at this layer even though this phase's
     endpoint constrains it to a positive integer — Phase 4 adds fractional
-    LLM-initiated trades and should not need a signature change.
+    LLM-initiated trades and should not need a signature change. Because a
+    future caller may bypass `TradeRequest`'s Pydantic constraints, `side`
+    and `quantity` are validated here rather than assumed.
     """
-    ticker = ticker.upper()
+    if side not in ("buy", "sell"):
+        raise InvalidTradeError(f"unsupported trade side: {side!r}")
+    if quantity <= 0:
+        raise InvalidTradeError(f"quantity must be positive, got {quantity!r}")
+
+    ticker = ticker.strip().upper()
     update = cache.get(ticker)
     if update is None:
         raise UntradableTickerError(ticker)
@@ -49,14 +57,12 @@ def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) ->
                     raise InsufficientCashError(ticker, cost, cash_balance)
                 new_cash_balance = cash_balance - cost
                 _apply_buy(conn, ticker, quantity, price, position)
-            elif side == "sell":
+            else:
                 owned = position["quantity"] if position is not None else 0
                 if quantity > owned:
                     raise InsufficientSharesError(ticker, owned)
                 new_cash_balance = cash_balance + cost
                 _apply_sell(conn, ticker, quantity, position)
-            else:
-                raise ValueError(f"unsupported trade side: {side!r}")
 
             executed_at = datetime.now(UTC).isoformat()
             _insert_trade(conn, ticker, side, quantity, price, executed_at)
