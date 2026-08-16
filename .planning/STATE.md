@@ -5,8 +5,8 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: Trading & Portfolio
 status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-08-16T02:16:22.189Z"
+stopped_at: Phase 2 UI-SPEC approved
+last_updated: "2026-08-16T02:26:54.990Z"
 last_activity: 2026-08-15
 last_activity_desc: Phase 01 complete, transitioned to Phase 2
 progress:
@@ -86,9 +86,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-16T02:16:22.180Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-trading-portfolio/02-CONTEXT.md
+Last session: 2026-08-16T02:26:54.980Z
+Stopped at: Phase 2 UI-SPEC approved
+Resume file: .planning/phases/02-trading-portfolio/02-UI-SPEC.md
 
 ### Phase 1 close-out summary
 
