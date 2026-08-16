@@ -13,7 +13,12 @@ from datetime import UTC, datetime
 from app.db.database import DEFAULT_USER_ID, connect, db_path
 from app.market.cache import PriceCache
 
-from .models import InsufficientCashError, TradeResult, UntradableTickerError
+from .models import (
+    InsufficientCashError,
+    InsufficientSharesError,
+    TradeResult,
+    UntradableTickerError,
+)
 
 
 def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) -> TradeResult:
@@ -42,6 +47,12 @@ def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) ->
                     raise InsufficientCashError(ticker, cost, cash_balance)
                 new_cash_balance = cash_balance - cost
                 _apply_buy(conn, ticker, quantity, price, position)
+            elif side == "sell":
+                owned = position["quantity"] if position is not None else 0
+                if quantity > owned:
+                    raise InsufficientSharesError(ticker, owned)
+                new_cash_balance = cash_balance + cost
+                _apply_sell(conn, ticker, quantity, position)
             else:
                 raise ValueError(f"unsupported trade side: {side!r}")
 
@@ -151,6 +162,26 @@ def _apply_buy(
     conn.execute(
         "UPDATE positions SET quantity = ?, avg_cost = ?, updated_at = ? WHERE id = ?",
         (new_quantity, new_avg_cost, now, position["id"]),
+    )
+
+
+def _apply_sell(
+    conn: sqlite3.Connection,
+    ticker: str,
+    quantity: float,
+    position: sqlite3.Row | None,
+) -> None:
+    """Reduce or remove a position on a sell. `avg_cost` is left untouched —
+    it records what was paid for the shares still held, not the sale."""
+    new_quantity = position["quantity"] - quantity
+    if new_quantity == 0:
+        conn.execute("DELETE FROM positions WHERE id = ?", (position["id"],))
+        return
+
+    now = datetime.now(UTC).isoformat()
+    conn.execute(
+        "UPDATE positions SET quantity = ?, updated_at = ? WHERE id = ?",
+        (new_quantity, now, position["id"]),
     )
 
 
