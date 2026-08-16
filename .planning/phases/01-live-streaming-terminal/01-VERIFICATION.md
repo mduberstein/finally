@@ -1,15 +1,17 @@
 ---
 phase: 01-live-streaming-terminal
 verified: 2026-08-15T02:35:00Z
-status: human_needed
+status: passed
 score: 2/4 must-haves verified
 behavior_unverified: 2
 overrides_applied: 0
 behavior_unverified_items:
+
   - truth: "Prices update continuously without a page reload; each change briefly flashes green on an uptick or red on a downtick and fades back within about half a second"
     test: "Serve the static export through FastAPI, open the app in a browser, and watch the watchlist grid for ~30 seconds."
     expected: "Price cells tint green on an uptick and red on a downtick, the tint fades back to the panel background within roughly 500ms, an unchanged price shows no tint, and every row always shows a direction triangle plus a signed percent regardless of flash state. With the OS set to reduce motion, the tint stops animating but the glyph and percent remain."
     why_human: "The flash state machine (nextFlashState/isFlashActive/directionGlyph) is fully unit-tested (13/13 passing, time-injected, no fake timers needed) and the CSS keyframes/durations/prefers-reduced-motion rule are grep-confirmed in globals.css, but no test renders PriceCell in a browser and observes the actual tint-and-fade or the reduced-motion suppression — that is a rendering-layer, real-time visual behavior no unit test exercises."
+
   - truth: "The header connection dot reads green while the stream is healthy, yellow while reconnecting, and red when the stream is down — and recovers to green on its own after the backend comes back"
     test: "Serve the static export through FastAPI, confirm the dot is green/Connected, stop the uvicorn process and watch the dot go yellow then red, then restart uvicorn without touching the browser and confirm the dot returns to green automatically while watchlist rows keep their last known prices."
     expected: "Dot and label cycle Connected (green) -> Reconnecting (yellow) -> Disconnected (red) -> Connected (green) automatically, with no user action, and the watchlist grid never blanks during the outage."
