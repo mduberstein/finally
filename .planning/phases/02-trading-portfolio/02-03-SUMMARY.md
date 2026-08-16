@@ -122,6 +122,16 @@ None — plan executed exactly as written. One acceptance-criteria-driven code s
 - Human verification of live visual behavior (color transitions, immediate row removal on full sell, skeleton-before-empty ordering) is deferred to end-of-phase UAT per `config.json`'s `human_verify_mode: "end-of-phase"` — flagged via `D2`'s `human_judgment: true` in coverage above
 - No blockers for Plan 02-04 or subsequent phases
 
+## Self-Check: PASSED
+
+- FOUND: frontend/components/PositionRow.tsx
+- FOUND: frontend/components/PositionsTable.tsx
+- FOUND: .planning/phases/02-trading-portfolio/02-03-SUMMARY.md
+- FOUND commit: 6f511ae (test)
+- FOUND commit: ee5eb1a (feat)
+- FOUND commit: 3fdd459 (feat)
+- FOUND commit: e8aa506 (docs)
+
 ---
 *Phase: 02-trading-portfolio*
 *Completed: 2026-08-16*
