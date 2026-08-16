@@ -75,6 +75,63 @@ class TestPostTrade:
         assert response.status_code == 422
 
 
+class TestTradeRejectionMapping:
+    def test_sell_of_unowned_ticker_returns_400_insufficient_shares(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+        with TestClient(app) as client:
+            for _ in range(50):
+                if client.app.state.prices.snapshot():
+                    break
+                time.sleep(0.05)
+            ticker = client.app.state.prices.snapshot()[0].ticker
+
+            response = client.post(
+                "/api/portfolio/trade",
+                json={"ticker": ticker, "side": "sell", "quantity": 1},
+            )
+
+        assert response.status_code == 400
+        assert response.json()["detail"]["code"] == "insufficient_shares"
+
+    def test_unaffordable_buy_returns_400_insufficient_cash(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+        with TestClient(app) as client:
+            for _ in range(50):
+                if client.app.state.prices.snapshot():
+                    break
+                time.sleep(0.05)
+            ticker = client.app.state.prices.snapshot()[0].ticker
+
+            response = client.post(
+                "/api/portfolio/trade",
+                json={"ticker": ticker, "side": "buy", "quantity": 10_000_000},
+            )
+
+        assert response.status_code == 400
+        assert response.json()["detail"]["code"] == "insufficient_cash"
+
+    def test_untradable_ticker_returns_400_untradable_ticker(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+        with TestClient(app) as client:
+            response = client.post(
+                "/api/portfolio/trade",
+                json={"ticker": "ZZZZ", "side": "buy", "quantity": 1},
+            )
+
+        assert response.status_code == 400
+        assert response.json()["detail"]["code"] == "untradable_ticker"
+
+    def test_non_numeric_quantity_returns_422(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+        with TestClient(app) as client:
+            response = client.post(
+                "/api/portfolio/trade",
+                json={"ticker": "AAPL", "side": "buy", "quantity": "many"},
+            )
+
+        assert response.status_code == 422
+
+
 class TestTradeRequestModel:
     def test_model_fields_has_no_price_key(self):
         from app.portfolio.routes import TradeRequest
