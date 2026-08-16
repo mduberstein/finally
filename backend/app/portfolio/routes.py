@@ -1,5 +1,6 @@
 """Portfolio router: `GET /api/portfolio` and `POST /api/portfolio/trade`."""
 
+import sqlite3
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException
@@ -43,6 +44,11 @@ def create_portfolio_router(cache: PriceCache) -> APIRouter:
             )
         except TradeRejected as error:
             raise HTTPException(status_code=400, detail=error.detail()) from error
+        except sqlite3.OperationalError as error:
+            raise HTTPException(
+                status_code=503,
+                detail={"code": "database_busy", "message": "trade could not be committed, try again"},
+            ) from error
         return {
             "ticker": result.ticker,
             "side": result.side,

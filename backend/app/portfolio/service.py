@@ -36,8 +36,10 @@ def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) ->
 
     with closing(sqlite3.connect(db_path(), isolation_level=None)) as conn:
         conn.row_factory = sqlite3.Row
+        began = False
         try:
             conn.execute("BEGIN IMMEDIATE")
+            began = True
             cash_balance = _read_cash_balance(conn)
             position = _read_position(conn, ticker)
             cost = quantity * price
@@ -61,7 +63,8 @@ def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) ->
             _write_cash_balance(conn, new_cash_balance)
             conn.execute("COMMIT")
         except Exception:
-            conn.execute("ROLLBACK")
+            if began:
+                conn.execute("ROLLBACK")
             raise
 
     return TradeResult(
