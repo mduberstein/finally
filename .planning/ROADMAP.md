@@ -66,17 +66,17 @@ Plans:
   4. Buying beyond available cash, or selling more shares than owned, is refused with a clear on-screen error and leaves cash and positions unchanged
   5. The positions table shows ticker, quantity, average cost, current price, unrealized P&L, and % change, and the header total value (cash + positions) moves with every price tick
 
-**Plans**: 3 plans
+**Plans**: 3/3 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — Tracer: a Buy travels from the trade bar to SQLite and back as a live header total
+- [x] 02-01-PLAN.md — Tracer: a Buy travels from the trade bar to SQLite and back as a live header total
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 02-02-PLAN.md — Sell, the oversell guard, the full TEST-01 backend suite, and the inline error surface
-- [ ] 02-03-PLAN.md — Positions table with live price, unrealized P&L, and % change
+- [x] 02-02-PLAN.md — Sell, the oversell guard, the full TEST-01 backend suite, and the inline error surface
+- [x] 02-03-PLAN.md — Positions table with live price, unrealized P&L, and % change
 
 **UI hint**: yes
 
@@ -137,7 +137,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Live Streaming Terminal | 4/4 | Complete    | 2026-08-15 |
-| 2. Trading & Portfolio | 0/3 | Planned      | - |
+| 2. Trading & Portfolio | 3/3 | In Progress|  |
 | 3. Visual Terminal & Watchlist Control | 0/TBD | Not started | - |
 | 4. AI Copilot | 0/TBD | Not started | - |
 | 5. One-Command Launch | 0/TBD | Not started | - |
