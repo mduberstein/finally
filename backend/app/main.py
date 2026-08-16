@@ -12,6 +12,7 @@ from app import db
 from app.market import MarketFeed, PriceCache, PriceUpdate, create_source
 from app.market.simulator import SimulatorSource
 from app.market.stream import create_stream_router
+from app.portfolio import create_portfolio_router
 
 # Module-level cache: the stream router factory binds to a cache at import
 # time, so it must exist before the app object (and its lifespan) is built.
@@ -71,6 +72,7 @@ def _watchlist_entry(ticker: str, update: PriceUpdate | None) -> dict:
 
 
 app.include_router(create_stream_router(cache))
+app.include_router(create_portfolio_router(cache))
 
 # Resolved against the repo root (not the process cwd) so `backend/static`
 # means the same directory whether uvicorn is started from the repo root or
