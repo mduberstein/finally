@@ -16,26 +16,27 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 - ✓ In-memory price cache with change/direction computation — existing
 - ✓ Resilient background polling feed (transient-error tolerance, auth fallback, rate-limit backoff) — existing
 - ✓ SSE stream router factory for `/api/stream/prices` (built but not yet wired into a running app) — existing
+- ✓ FastAPI app assembly: lifespan wiring of `MarketFeed` + `PriceCache` into a running app — Phase 1 (MARKET-04)
+- ✓ SQLite schema + lazy init/seed (users_profile, watchlist, positions, trades, portfolio_snapshots, chat_messages) — Phase 1 (INFRA-01)
+- ✓ Watchlist read path: 10 default tickers with live SSE prices in a dark terminal grid — Phase 1 (MARKET-01, WATCH-01)
+- ✓ Price flash animations (green/red, fade ~500ms) driven by the SSE stream — Phase 1 (MARKET-02)
+- ✓ Connection status indicator (green/yellow/red, with staleness-aware recovery) — Phase 1 (MARKET-03)
+- ✓ Dark terminal visual theme (colors per PLAN.md) built with Tailwind CSS — Phase 1 (UI-01)
 
 ### Active
 
-- [ ] FastAPI app assembly: lifespan wiring of `MarketFeed` + `PriceCache` into a running app
-- [ ] SQLite schema + lazy init/seed (users_profile, watchlist, positions, trades, portfolio_snapshots, chat_messages)
 - [ ] Portfolio API: `GET /api/portfolio`, `POST /api/portfolio/trade`, `GET /api/portfolio/history`
-- [ ] Watchlist API: `GET/POST /api/watchlist`, `DELETE /api/watchlist/{ticker}`
+- [ ] Watchlist write API: `POST /api/watchlist`, `DELETE /api/watchlist/{ticker}`
 - [ ] Trade execution logic: market orders, instant fill, cash/position validation, avg cost tracking
 - [ ] Portfolio snapshot background task (every 30s + immediately after each trade)
 - [ ] LLM chat integration: `POST /api/chat` via LiteLLM → OpenRouter (Cerebras, `gpt-oss-120b`), structured output schema, auto-executed trades/watchlist changes
 - [ ] `LLM_MOCK` deterministic mode for testing
-- [ ] Next.js TypeScript frontend (static export) — watchlist grid, sparkline mini-charts, main chart, portfolio heatmap, P&L chart, positions table, trade bar, AI chat panel, header
-- [ ] Price flash animations (green/red, fade ~500ms) driven by the SSE stream
-- [ ] Connection status indicator (green/yellow/red)
-- [ ] Dark terminal visual theme (colors per PLAN.md) built with Tailwind CSS
+- [ ] Remaining frontend surfaces — sparkline mini-charts, main chart, portfolio heatmap, P&L chart, positions table, trade bar, AI chat panel (watchlist grid + header shipped in Phase 1)
 - [ ] Multi-stage Dockerfile (Node build → Python runtime) serving static frontend + API on port 8000
 - [ ] `docker-compose.yml` convenience wrapper
 - [ ] Start/stop scripts (mac + windows)
 - [ ] Backend unit tests: portfolio math, LLM structured-output parsing, API routes
-- [ ] Frontend unit tests: component rendering, price flash, watchlist CRUD, chat rendering
+- [ ] Frontend unit tests: component rendering, watchlist CRUD, chat rendering
 - [ ] Playwright E2E suite in `test/` with `docker-compose.test.yml`, `LLM_MOCK=true` scenarios
 
 ### Out of Scope
@@ -74,6 +75,8 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 | Skip cloud deployment (Terraform/App Runner) | Explicit stretch goal in PLAN.md; user wants Docker-only for this build | — Pending |
 | Use the real `OPENROUTER_API_KEY` from the start (not `LLM_MOCK`) | Key already present in `.env` per user | — Pending |
 | AI Integration Phase workflow toggle left off | User's explicit choice in `/gsd-settings`; framework already fixed by PLAN.md (LiteLLM/OpenRouter/Cerebras), so framework-selection research isn't needed | — Pending |
+| Watchlist rows use `<div role="button">` with `tabindex`/focus-ring styling rather than semantic `<button>` | Lets the grid-column layout (ticker / price / change%) render as CSS grid children directly, keeping keyboard/AT accessibility via ARIA role instead of native button box model | ✓ Shipped Phase 1 — verified hover/focus accent-blue affordances live |
+| Connection health derives from a periodic staleness tick plus real EventSource events, not `readyState` alone | A wedged-but-open SSE socket must downgrade to "Reconnecting" instead of showing a false-green "Connected" over frozen prices (T-01-12) | ✓ Shipped Phase 1 |
 
 ## Evolution
 
@@ -93,4 +96,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-12 after initialization*
+*Last updated: 2026-08-16 after Phase 1*

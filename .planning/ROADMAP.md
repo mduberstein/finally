@@ -13,7 +13,7 @@ FinAlly starts from a tested-but-unwired market data package and ends as a singl
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Live Streaming Terminal** - Wire the existing market feed into a running FastAPI app with a database and a dark terminal UI showing live-streaming prices
+- [x] **Phase 1: Live Streaming Terminal** - Wire the existing market feed into a running FastAPI app with a database and a dark terminal UI showing live-streaming prices (completed 2026-08-15)
 - [ ] **Phase 2: Trading & Portfolio** - User buys and sells shares at live prices and watches cash, positions, and total value respond
 - [ ] **Phase 3: Visual Terminal & Watchlist Control** - Heatmap, P&L chart, sparklines, main chart, and full watchlist curation in the complete terminal layout
 - [ ] **Phase 4: AI Copilot** - Chat assistant that analyzes the portfolio and executes trades and watchlist changes through natural language
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Live Streaming Terminal | 4/4 | In Progress|  |
+| 1. Live Streaming Terminal | 4/4 | Complete    | 2026-08-15 |
 | 2. Trading & Portfolio | 0/TBD | Not started | - |
 | 3. Visual Terminal & Watchlist Control | 0/TBD | Not started | - |
 | 4. AI Copilot | 0/TBD | Not started | - |
