@@ -21,8 +21,8 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 - [ ] **PORT-03**: User can sell shares they own at the current market price — instant fill
 - [ ] **PORT-04**: Buying with insufficient cash is rejected with a clear error
 - [ ] **PORT-05**: Selling more shares than owned is rejected with a clear error
-- [ ] **PORT-06**: User can view a positions table: ticker, quantity, avg cost, current price, unrealized P&L, % change
-- [ ] **PORT-07**: User can view total portfolio value (cash + position value) updating live in the header
+- [x] **PORT-06**: User can view a positions table: ticker, quantity, avg cost, current price, unrealized P&L, % change
+- [x] **PORT-07**: User can view total portfolio value (cash + position value) updating live in the header
 - [ ] **PORT-08**: User can view a portfolio heatmap (treemap) sized by position weight, colored by P&L
 - [ ] **PORT-09**: User can view a P&L chart of total portfolio value over time, recorded every 30s and after each trade
 - [ ] **PORT-10**: Trade history is recorded append-only in the trades table
@@ -99,8 +99,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PORT-03 | Phase 2 | Pending |
 | PORT-04 | Phase 2 | Pending |
 | PORT-05 | Phase 2 | Pending |
-| PORT-06 | Phase 2 | Pending |
-| PORT-07 | Phase 2 | Pending |
+| PORT-06 | Phase 2 | Complete |
+| PORT-07 | Phase 2 | Complete |
 | PORT-08 | Phase 3 | Pending |
 | PORT-09 | Phase 3 | Pending |
 | PORT-10 | Phase 2 | Pending |
@@ -132,6 +132,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-04 | Phase 5 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 40 total (MARKET 4, PORT 10, WATCH 5, CHAT 9, UI 4, INFRA 4, TEST 4)
 - Mapped to phases: 40 ✓
 - Unmapped: 0
