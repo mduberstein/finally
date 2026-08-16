@@ -335,14 +335,14 @@ def watchlist_tickers() -> list[str]:
 | A2 | Positions table's "current price"/"unrealized P&L"/"% change" columns should live-update via the same SSE overlay as the header, even though only the header's live update is an explicit success criterion | Architecture Patterns, Pattern 3 | Low — if not done, the positions table would only refresh after each trade/page load rather than every tick; visually inconsistent with the header but not a functional defect against the stated success criteria |
 | A3 | `execute_trade()` should accept `float` quantity at the service layer (even though this phase's endpoint types the request as `int`), to avoid a signature change when Phase 4 adds fractional LLM-initiated trades | Code Examples | Low — reversible; if Phase 4 instead builds an entirely separate execution path, this forward-compatibility choice costs nothing now |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should `POST /api/portfolio/trade` and the internal `execute_trade()` be the exact function Phase 4's LLM chat flow reuses, or will Phase 4 introduce a parallel path?**
+1. **RESOLVED — Should `POST /api/portfolio/trade` and the internal `execute_trade()` be the exact function Phase 4's LLM chat flow reuses, or will Phase 4 introduce a parallel path?**
    - What we know: PLAN.md §9 states LLM-initiated trades "go through the same validation as manual trades."
    - What's unclear: Whether that means literally calling `execute_trade()`, or re-implementing equivalent validation in the chat flow.
-   - Recommendation: Design `execute_trade(ticker, side, quantity, cache)` as a plain, HTTP-agnostic function in `app/portfolio/service.py` (not embedded in the route handler) specifically so Phase 4 can import and call it directly — low cost now, removes a real risk of validation drift later.
+   - Decision (adopted in 02-01-PLAN.md, Task 1): `execute_trade(ticker, side, quantity, cache)` is a plain, HTTP-agnostic function in `app/portfolio/service.py` (not embedded in the route handler) specifically so Phase 4 can import and call it directly — low cost now, removes a real risk of validation drift later.
 
-2. **HTTP status code convention for domain trade rejections (400 vs 422)** — see Assumption A1. Not blocking; either choice is internally consistent as long as it's applied uniformly to all three rejection cases (PORT-04, PORT-05, D-02's untradable-ticker case).
+2. **RESOLVED — HTTP status code convention for domain trade rejections (400 vs 422)** — see Assumption A1. Decision (adopted in 02-01-PLAN.md, Task 1 acceptance criteria): use HTTP 400 for all three domain rejection cases (PORT-04 insufficient cash, PORT-05 overselling, D-02 untradable-ticker), reserving 422 for FastAPI's own request-shape validation failures.
 
 ## Environment Availability
 
