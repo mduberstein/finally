@@ -42,6 +42,8 @@
   --color-up: var(--up);
   --color-down: var(--down);
   --color-reconnecting: var(--reconnecting);
+  --color-submit: var(--submit);
+  --color-submit-foreground: var(--submit-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -126,6 +128,11 @@
   --up: #16a34a;
   --down: #dc2626;
   --reconnecting: #eab308;
+
+  /* Purple Secondary — reserved for submit buttons (trade bar Buy/Sell),
+     distinct from the brand accent blue used on the wordmark and watchlist. */
+  --submit: #753991;
+  --submit-foreground: #ffffff;
 }
 
 @layer base {
