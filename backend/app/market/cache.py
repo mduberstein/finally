@@ -40,3 +40,8 @@ class PriceCache:
     def snapshot(self) -> list[PriceUpdate]:
         """Everything currently known — sent to each new SSE subscriber."""
         return list(self._prices.values())
+
+    def clear(self) -> None:
+        """Drop all known prices. Used by tests to isolate a shared cache
+        instance between `TestClient(app)` runs."""
+        self._prices.clear()

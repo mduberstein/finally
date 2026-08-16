@@ -84,6 +84,22 @@ class TestPriceCacheGet:
         assert cache.get("AAPL").price == 200.0
 
 
+class TestPriceCacheClear:
+    def test_clear_empties_the_cache(self):
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 190.0), _quote("GOOGL", 175.0)])
+
+        cache.clear()
+
+        assert cache.snapshot() == []
+        assert cache.get("AAPL") is None
+
+    def test_clear_on_empty_cache_is_a_no_op(self):
+        cache = PriceCache()
+        cache.clear()
+        assert cache.snapshot() == []
+
+
 class TestPriceCacheSnapshot:
     def test_empty_cache(self):
         cache = PriceCache()
