@@ -9,7 +9,7 @@ from app.market.cache import PriceCache
 from app.market.models import PriceUpdate
 
 from .models import WatchlistRejected
-from .service import add_ticker
+from .service import add_ticker, remove_ticker
 
 
 class WatchlistAddRequest(BaseModel):
@@ -40,6 +40,14 @@ def create_watchlist_router(cache: PriceCache) -> APIRouter:
         except WatchlistRejected as error:
             raise HTTPException(status_code=400, detail=error.detail()) from error
         return _watchlist_entry(normalized, cache.get(normalized))
+
+    @router.delete("/api/watchlist/{ticker}")
+    async def delete_watchlist_ticker(ticker: str) -> dict:
+        try:
+            removed = await run_in_threadpool(remove_ticker, ticker)
+        except WatchlistRejected as error:
+            raise HTTPException(status_code=400, detail=error.detail()) from error
+        return {"ticker": ticker.strip().upper(), "removed": removed}
 
     return router
 

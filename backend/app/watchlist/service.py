@@ -59,3 +59,22 @@ def add_ticker(ticker: str) -> str:
         conn.commit()
 
     return normalized
+
+
+def remove_ticker(ticker: str) -> bool:
+    """Normalize then delete -- idempotent: an absent ticker is not an error.
+
+    A retry or a double-click needs no client-side coordination. The
+    statement names exactly one table; nothing in this package ever writes
+    to `positions`, `trades`, `users_profile`, or `portfolio_snapshots`.
+    """
+    normalized = normalize_ticker(ticker)
+
+    with closing(connect()) as conn:
+        cursor = conn.execute(
+            "DELETE FROM watchlist WHERE user_id = ? AND ticker = ?",
+            (DEFAULT_USER_ID, normalized),
+        )
+        conn.commit()
+
+    return cursor.rowcount > 0

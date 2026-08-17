@@ -44,8 +44,12 @@ class TestAddTicker:
 
     def test_add_past_cap_raises_and_writes_nothing(self, tmp_path, monkeypatch):
         _use_tmp_db(tmp_path, monkeypatch)
-        for i in range(MAX_WATCHLIST_TICKERS):
-            add_ticker(f"T{i}")
+        # Letters-only synthetic tickers -- normalize_ticker rejects digits.
+        synthetic_tickers = [
+            chr(65 + i // 26) + chr(65 + i % 26) for i in range(MAX_WATCHLIST_TICKERS)
+        ]
+        for ticker in synthetic_tickers:
+            add_ticker(ticker)
 
         with pytest.raises(WatchlistFullError):
             add_ticker("OVER")

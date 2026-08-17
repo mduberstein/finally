@@ -2,7 +2,7 @@
 
 from .models import DuplicateTickerError, InvalidTickerError, WatchlistFullError, WatchlistRejected
 from .routes import create_watchlist_router
-from .service import add_ticker, normalize_ticker
+from .service import add_ticker, normalize_ticker, remove_ticker
 
 __all__ = [
     "DuplicateTickerError",
@@ -12,4 +12,5 @@ __all__ = [
     "add_ticker",
     "create_watchlist_router",
     "normalize_ticker",
+    "remove_ticker",
 ]
