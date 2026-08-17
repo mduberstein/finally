@@ -1,20 +1,24 @@
 ---
 phase: 02-trading-portfolio
 verified: 2026-08-16T06:15:33Z
-status: human_needed
+status: passed
 score: 41/41 must-haves verified (5 roadmap success criteria + 36 plan-level truths)
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
+
   - test: "Stop the backend while the app is running, confirm the header keeps showing its last cash and total value (not zero/blank) and the connection dot goes red; restart the backend and confirm figures resume updating."
     expected: "Header never flashes to $0.00 or blank on a dropped connection; last-good figures persist; dot goes red then back to green."
     why_human: "Visual/real-time behavior across a live disconnect — not observable from a static build or unit test. Deferred from Plan 02-01 Task 2's <human-check> per config.json human_verify_mode: end-of-phase."
+
   - test: "Click Buy with both fields empty (confirm disabled). Type AAPL and 99999, click Buy (confirm the insufficient-cash sentence appears directly under the inputs naming your actual cash, and clears when quantity changes). Buy 5 AAPL, try to sell 6 (confirm overselling sentence names 5). Sell all 5. Type ZZZZ and 1 (confirm untradable-ticker sentence). Confirm none of these render as a toast or modal."
     expected: "All four error sentences appear inline beneath the trade bar in the exact UI-SPEC copy, clear on next input change, and buttons are visually disabled when appropriate."
     why_human: "Exact on-screen placement, disabled-state styling, and toast/modal absence require visual confirmation in a running browser. Deferred from Plan 02-02 Task 2's <human-check>."
+
   - test: "With a fresh database, confirm the Positions panel shows the empty-state heading/body. Buy 5 AAPL and 3 NVDA — confirm two rows appear, price/P&L/percent keep changing on their own as prices tick, P&L is green when positive and red when negative. Sell all 5 AAPL — confirm that row disappears immediately (no zero-quantity row). Reload the page — confirm skeleton rows appear briefly instead of an empty-state flash."
     expected: "Empty state, live-moving populated rows with correct coloring, immediate row removal on full sell, and skeleton-before-load ordering all hold visually."
     why_human: "Live color transitions, per-tick movement, and loading-sequence ordering require visual observation in a running browser. Deferred from Plan 02-03 Task 2's <human-check>."
+
   - test: "Review the 5 judgment-tier prohibitions recorded across the three plans (no shaming/blaming rejection copy, no urgency/dark-pattern trade-bar framing, no simulated money presented as real, no stale price shown as live) against the running app."
     expected: "Each prohibition holds in practice, not just in the reviewed source text."
     why_human: "Prohibition status is `verification: judgment` in all 5 cases — this agent's code-level read (copy text, initial-state code, disclaimer text) is a non-authoritative LLM-judge pass, not a substitute for human sign-off. Flagged per verification-overrides/prohibition routing rules — unverified-prohibition, human review recommended."
