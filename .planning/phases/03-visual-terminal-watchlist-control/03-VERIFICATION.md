@@ -1,38 +1,48 @@
 ---
 phase: 03-visual-terminal-watchlist-control
 verified: 2026-08-17T14:45:00Z
-status: human_needed
+status: passed
 score: 5/5 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
+
   - test: "POST a new ticker (e.g. PYPL) via the live add form and wait ~2s"
     expected: "Row appears immediately with an em-dash/null price, then shows a live streaming price within one poll interval; posting the same ticker again shows the duplicate error inline"
     why_human: "Visual rendering and timing of the live price transition in a real browser; automated evidence only covers the HTTP contract and unit-level logic"
+
   - test: "Type an invalid ticker (e.g. aa1) into the add form"
     expected: "Add button stays disabled and no request is sent"
     why_human: "Client-side form interaction state, not exercised by a DOM-rendering test"
+
   - test: "Click the remove (x) control on a watchlist row, then re-add the same ticker"
     expected: "Row disappears immediately; re-adding starts its sparkline empty rather than resuming its old shape; portfolio/cash/positions unaffected by a watchlist removal"
     why_human: "Visual sparkline reset and row removal are DOM/browser behaviors outside static analysis"
+
   - test: "Load the app against a fresh database and watch the Portfolio Value panel without trading"
     expected: "Empty state, then a chart appears with a new point roughly every 30 seconds"
     why_human: "Real-time timing behavior in a live browser session"
+
   - test: "Buy shares, confirm the P&L chart gets an immediate point, buy again later and confirm two points join into a line, reload and confirm both persist"
     expected: "Chart updates immediately on trade and on the 30s cadence, survives reload"
     why_human: "Visual chart rendering across a page reload"
+
   - test: "Buy a large position and two smaller ones; observe the heatmap"
     expected: "Rectangle sizes are visibly proportional to position weight; losing positions render red, winning ones green, each with a signed percent label"
     why_human: "Visual color/size perception in a rendered browser, not verifiable via grep/unit test"
+
   - test: "Click AAPL then GOOGL rows in the watchlist; click the remove control on a row"
     expected: "Main chart switches instantly with no loading flicker on ticker click; remove control does not also select/switch the chart"
     why_human: "Click-interaction and render-timing behavior in a live DOM"
+
   - test: "Confirm the AI Copilot placeholder panel visually matches the height/chrome of the heatmap and P&L chart"
     expected: "Same panel treatment, no interactive elements"
     why_human: "Visual chrome parity is a rendering check"
+
   - test: "Open the app maximized on a wide screen, then narrow to ~800px, then widen back"
     expected: "All eight panels visible without horizontal scroll at wide width; single stacked column with nothing hidden at ~800px; charts redraw (not blank) at both widths; removing all watchlist tickers doesn't shift the rest of the layout"
     why_human: "Responsive layout behavior across viewport widths requires a real browser"
+
   - test: "Full desktop layout — watchlist column padding/alignment, no clipping in any of the five row columns"
     expected: "Ticker, price, percent, sparkline, and remove control all render without clipping at the 420px column width"
     why_human: "Visual pixel-level rendering check"
