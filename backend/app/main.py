@@ -11,7 +11,7 @@ from app import db
 from app.market import MarketFeed, PriceCache, create_source
 from app.market.simulator import SimulatorSource
 from app.market.stream import create_stream_router
-from app.portfolio import create_portfolio_router
+from app.portfolio import SnapshotWriter, create_portfolio_router
 from app.watchlist import create_watchlist_router
 
 # Module-level cache: the stream router factory binds to a cache at import
@@ -29,10 +29,14 @@ async def lifespan(app: FastAPI):
         fallback_factory=SimulatorSource,
     )
     feed.start()
+    snapshots = SnapshotWriter(cache)
+    snapshots.start()
     app.state.prices = cache
     app.state.feed = feed
+    app.state.snapshots = snapshots
     yield
     await feed.stop()
+    await snapshots.stop()
 
 
 app = FastAPI(lifespan=lifespan)
