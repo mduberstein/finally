@@ -87,7 +87,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260817-lcw | Fix page.tsx watchlist remove handler to clear selectedTicker when the removed ticker is the currently-selected one (WR-03 from 03-REVIEW.md) | 2026-08-17 | 11b4d72 | [260817-lcw-fix-page-tsx-watchlist-remove-handler-to](./quick/260817-lcw-fix-page-tsx-watchlist-remove-handler-to/) |
-| 260817-mlm | Fix _apply_sell's exact float == 0 close-position check to use an epsilon threshold, so fractional sells (Phase 4) can't leave a near-zero ghost position row (WR-02 from 03-REVIEW.md) | 2026-08-17 | (pending) | [260817-mlm-fix-apply-sell-s-exact-float-0-close-pos](./quick/260817-mlm-fix-apply-sell-s-exact-float-0-close-pos/) |
+| 260817-mlm | Fix _apply_sell's exact float == 0 close-position check to use an epsilon threshold, so fractional sells (Phase 4) can't leave a near-zero ghost position row (WR-02 from 03-REVIEW.md) | 2026-08-17 | db66653 | [260817-mlm-fix-apply-sell-s-exact-float-0-close-pos](./quick/260817-mlm-fix-apply-sell-s-exact-float-0-close-pos/) |
 
 ## Deferred Items
 
