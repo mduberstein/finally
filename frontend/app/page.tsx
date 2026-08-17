@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
+import { Heatmap } from "@/components/Heatmap";
+import { MainChart } from "@/components/MainChart";
 import { PnlChart } from "@/components/PnlChart";
 import { PositionsTable } from "@/components/PositionsTable";
 import { TradeBar } from "@/components/TradeBar";
 import { Watchlist } from "@/components/Watchlist";
+import { deriveHeatmapItems } from "@/lib/heatmap";
 import { derivePortfolioValue, derivePositionRows } from "@/lib/portfolio";
 import { usePriceHistory } from "@/lib/usePriceHistory";
 import { usePriceStream } from "@/lib/usePriceStream";
@@ -83,11 +86,19 @@ export default function Home() {
     [portfolio, prices],
   );
 
+  const heatmapItems = useMemo(() => deriveHeatmapItems(positionRows), [positionRows]);
+
   const watchlistTickers = useMemo(
     () => watchlist?.map((entry) => entry.ticker) ?? [],
     [watchlist],
   );
   const history = usePriceHistory(prices, watchlistTickers);
+
+  const selectedPoints = selectedTicker ? (history[selectedTicker] ?? []) : [];
+  const selectedPrice = selectedTicker ? (prices[selectedTicker]?.price ?? null) : null;
+  const selectedChangePercent = selectedTicker
+    ? (prices[selectedTicker]?.change_percent ?? null)
+    : null;
 
   function handleAdded(entry: WatchlistEntry) {
     setWatchlist((current) => [...(current ?? []), entry]);
@@ -126,6 +137,13 @@ export default function Home() {
           onAdded={handleAdded}
           onRemove={handleRemove}
         />
+        <MainChart
+          ticker={selectedTicker}
+          points={selectedPoints}
+          price={selectedPrice}
+          changePercent={selectedChangePercent}
+        />
+        <Heatmap items={heatmapItems} />
         <PositionsTable rows={positionRows} />
         <PnlChart points={portfolioHistory} />
       </main>
