@@ -447,17 +447,17 @@ export function Sparkline({ points, width = 96, height = 28, direction }: Sparkl
 | A2 | Recharts default line-chart re-render behavior under rapid (~500ms) data updates causes visible animation jitter unless `isAnimationActive={false}` is set | Code Examples | If wrong, worst case is a cosmetic animation quirk on the main chart, not a functional bug — easy to spot and fix during implementation/UAT |
 | A3 | `npm view recharts` weekly download count was not directly queried (no `npm view` field for it) — legitimacy is argued from the package's 10-year registry age, real GitHub repo, and known community prominence (e.g. shipped inside shadcn/ui's own chart component) rather than a download-count figure | Package Legitimacy Audit | Low risk — age, repo, and license signals are independently strong; if this reasoning is wrong the planner should re-run `npm view recharts` fresh before install |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact sparkline/main-chart history window (point count / time span)**
+1. **RESOLVED — Exact sparkline/main-chart history window (point count / time span)**
    - What we know: CONTEXT.md explicitly leaves "exact windowing/resolution" to implementer judgment, and confirms there is no backend history endpoint for this data (client-accumulates since page load only).
    - What's unclear: A hard cap on points (e.g. last 200 ticks vs. unbounded) isn't specified — unbounded accumulation over a long-running session could grow memory/render cost.
-   - Recommendation: Cap each ticker's history array at a fixed length (e.g. 300 points ≈ 2.5 minutes of simulator ticks at 500ms) via `.slice(-maxPoints)` as shown in Pattern 1 — cheap, bounded, and 2.5 minutes of visible history is more than enough for a sparkline/main-chart at MVP scope.
+   - Decision (adopted in 03-01-PLAN.md): Cap each ticker's history array at a fixed length (300 points ≈ 2.5 minutes of simulator ticks at 500ms) via `.slice(-maxPoints)` as shown in Pattern 1 — cheap, bounded, and 2.5 minutes of visible history is more than enough for a sparkline/main-chart at MVP scope.
 
-2. **Whether the new watchlist module should be a new `backend/app/watchlist/` package or added to `backend/app/portfolio/`**
+2. **RESOLVED — Whether the new watchlist module should be a new `backend/app/watchlist/` package or added to `backend/app/portfolio/`**
    - What we know: The existing project structure gives `market/` and `portfolio/` each their own package with a `routes.py`/`service.py`/`models.py` shape; watchlist logic (add/remove tickers) is conceptually closer to `market/` (it drives what `MarketFeed` polls) but the CRUD/db-write shape matches `portfolio/`'s pattern more closely.
    - What's unclear: No existing precedent settles this exactly — Phase 1/2 never needed a watchlist *write* path (only `db.watchlist_tickers()` read).
-   - Recommendation: A new `backend/app/watchlist/` package (Recommended Project Structure above) — keeps `market/` focused purely on price-fetching/streaming and `portfolio/` focused on money/trades, with `watchlist/` as its own third domain, matching the existing one-package-per-concern convention rather than overloading either existing package.
+   - Decision (adopted in 03-01-PLAN.md): A new `backend/app/watchlist/` package (Recommended Project Structure above) — keeps `market/` focused purely on price-fetching/streaming and `portfolio/` focused on money/trades, with `watchlist/` as its own third domain, matching the existing one-package-per-concern convention rather than overloading either existing package.
 
 ## Environment Availability
 
