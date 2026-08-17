@@ -28,19 +28,24 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 - ✓ Trade bar with inline (never toast/modal) error copy — Phase 2 (UI-03)
 - ✓ Append-only trade history — Phase 2 (PORT-10)
 - ✓ Backend unit tests: trade execution, P&L math, concurrency, edge cases — Phase 2 (TEST-01)
+- ✓ Watchlist write API: `POST /api/watchlist`, `DELETE /api/watchlist/{ticker}` (server-side `^[A-Z]{1,10}$` validation, 50-ticker cap, `MarketFeed` picks up changes with no restart) — Phase 3 (WATCH-02, WATCH-03)
+- ✓ `GET /api/portfolio/history` + portfolio snapshot background task (writes on every trade inside its transaction, plus independently every 30s) — Phase 3 (PORT-09)
+- ✓ Sparkline mini-charts (hand-rolled SVG, accumulated client-side from the SSE stream, capped at 300 points/ticker) — Phase 3 (WATCH-04)
+- ✓ Main chart (click-to-select from watchlist, reuses the same price-history accumulator) — Phase 3 (WATCH-05)
+- ✓ Portfolio heatmap (squarified treemap, sized by position weight, colored by P&L) — Phase 3 (PORT-08)
+- ✓ P&L chart (Recharts line chart of `portfolio_snapshots`, loading/empty/single-point/populated states) — Phase 3 (PORT-09)
+- ✓ Full eight-panel terminal layout: two-column desktop grid, single-column tablet stack, reserved AI chat panel slot for Phase 4 — Phase 3 (UI-02, UI-04)
+- ✓ Frontend unit tests: price flash animation, watchlist CRUD, portfolio display calculations — Phase 3 (TEST-03, in the project's established pure-function-and-hook testing convention — no test yet exercises the live fetch-based add/remove call path end-to-end; flagged non-blocking in `03-VERIFICATION.md`)
 
 ### Active
 
-- [ ] `GET /api/portfolio/history` + portfolio snapshot background task (every 30s + immediately after each trade) — deferred to Phase 3 (PORT-09)
-- [ ] Watchlist write API: `POST /api/watchlist`, `DELETE /api/watchlist/{ticker}`
 - [ ] LLM chat integration: `POST /api/chat` via LiteLLM → OpenRouter (Cerebras, `gpt-oss-120b`), structured output schema, auto-executed trades/watchlist changes
 - [ ] `LLM_MOCK` deterministic mode for testing
-- [ ] Remaining frontend surfaces — sparkline mini-charts, main chart, portfolio heatmap, P&L chart, AI chat panel (watchlist grid, header, trade bar, positions table shipped in Phases 1-2)
+- [ ] AI chat panel (frontend) — `ChatPlaceholder` shipped in Phase 3 as an inert, correctly-sized slot; Phase 4 fills it with live content
 - [ ] Multi-stage Dockerfile (Node build → Python runtime) serving static frontend + API on port 8000
 - [ ] `docker-compose.yml` convenience wrapper
 - [ ] Start/stop scripts (mac + windows)
-- [ ] Backend unit tests: LLM structured-output parsing (portfolio/trade tests shipped Phase 2)
-- [ ] Frontend unit tests: component rendering, watchlist CRUD, chat rendering
+- [ ] Backend unit tests: LLM structured-output parsing
 - [ ] Playwright E2E suite in `test/` with `docker-compose.test.yml`, `LLM_MOCK=true` scenarios
 
 ### Out of Scope
@@ -84,6 +89,11 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 | Trades fill at a server-authoritative price read from `PriceCache` inside the transaction; the client can never supply a price | Matches PLAN.md's "instant fill at current market price" and closes a client-price-tampering threat (T-02-02) before it opens | ✓ Shipped Phase 2 |
 | Trade bar accepts only watchlist tickers and whole-share quantities; `execute_trade()` itself stays float-typed and HTTP-agnostic | Keeps Phase 2 simple (no arbitrary-ticker lookup, no fractional-share UI) while leaving the service function ready for Phase 4's LLM-initiated trades to call directly | ✓ Shipped Phase 2 |
 | Concurrent trades serialized via SQLite `BEGIN IMMEDIATE` before the first read | Prevents a lost-update race where two near-simultaneous trades validate against stale cash/position state (T-02-03/T-02-07) | ✓ Shipped Phase 2 |
+| Watchlist and positions are fully decoupled tables with no FK relationship; trade execution has zero reference to the watchlist | A user can hold a position in a ticker they've since removed from the watchlist, or watch a ticker they've never traded — confirmed both intentional and correctly isolated (UAT test 3: removing a watchlist ticker leaves cash/positions/trades byte-identical) | ✓ Shipped Phase 3 |
+| Portfolio snapshot write lives inside `execute_trade()` itself, not the HTTP route handler | The service function is the one place every current and future caller — including Phase 4's chat-initiated trades — is guaranteed to pass through; a route-layer write would silently skip non-HTTP callers | ✓ Shipped Phase 3 |
+| `SnapshotWriter` lives in `backend/app/portfolio/`, not `backend/app/market/` (deviating from `03-RESEARCH.md`'s suggested location) | A portfolio-value writer is money logic and must not create a dependency from the price-only `market` package into `portfolio` | ✓ Shipped Phase 3 |
+| Heatmap sizing is a pure numeric function (squarified treemap, Bruls/Huizing/van Wijk heuristic) applied only via flexbox `flexGrow` — no pixel math, no DOM measurement | Keeps the algorithm unit-testable in isolation and removes any layout-escape surface from server-supplied position values | ✓ Shipped Phase 3 |
+| Client-side ticker validation in the watchlist add form is a UX courtesy; `normalize_ticker`'s server-side `^[A-Z]{1,10}$` check is the sole authority | Matches the Phase 1/2 precedent (server-authoritative price) — never trust client validation as the security boundary | ✓ Shipped Phase 3 |
 
 ## Evolution
 
@@ -103,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-16 after Phase 2*
+*Last updated: 2026-08-17 after Phase 3*
