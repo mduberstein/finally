@@ -23,17 +23,17 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 - [x] **PORT-05**: Selling more shares than owned is rejected with a clear error
 - [x] **PORT-06**: User can view a positions table: ticker, quantity, avg cost, current price, unrealized P&L, % change
 - [x] **PORT-07**: User can view total portfolio value (cash + position value) updating live in the header
-- [ ] **PORT-08**: User can view a portfolio heatmap (treemap) sized by position weight, colored by P&L
+- [x] **PORT-08**: User can view a portfolio heatmap (treemap) sized by position weight, colored by P&L
 - [x] **PORT-09**: User can view a P&L chart of total portfolio value over time, recorded every 30s and after each trade
 - [x] **PORT-10**: Trade history is recorded append-only in the trades table
 
 ### Watchlist
 
 - [x] **WATCH-01**: User sees 10 default watchlist tickers on first launch (AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX)
-- [ ] **WATCH-02**: User can add a ticker to the watchlist
-- [ ] **WATCH-03**: User can remove a ticker from the watchlist
-- [ ] **WATCH-04**: Each watchlist row shows a sparkline mini-chart accumulated from the SSE stream since page load
-- [ ] **WATCH-05**: Clicking a watchlist ticker selects it in the main chart area
+- [x] **WATCH-02**: User can add a ticker to the watchlist
+- [x] **WATCH-03**: User can remove a ticker from the watchlist
+- [x] **WATCH-04**: Each watchlist row shows a sparkline mini-chart accumulated from the SSE stream since page load
+- [x] **WATCH-05**: Clicking a watchlist ticker selects it in the main chart area
 
 ### AI Chat
 
@@ -50,9 +50,9 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 ### Frontend & Visual Design
 
 - [x] **UI-01**: Dark trading-terminal visual theme (near-black backgrounds, muted borders, brand accent colors) applied consistently across the app
-- [ ] **UI-02**: Layout includes watchlist panel, main chart area, portfolio heatmap, P&L chart, positions table, trade bar, AI chat panel, and header — all visible without excess scrolling on a wide desktop screen
+- [x] **UI-02**: Layout includes watchlist panel, main chart area, portfolio heatmap, P&L chart, positions table, trade bar, AI chat panel, and header — all visible without excess scrolling on a wide desktop screen
 - [x] **UI-03**: Trade bar lets the user enter ticker/quantity and submit buy or sell with one click
-- [ ] **UI-04**: App is usable (not broken) on a tablet-width viewport, optimized for desktop
+- [x] **UI-04**: App is usable (not broken) on a tablet-width viewport, optimized for desktop
 
 ### Infrastructure & Deployment
 
@@ -65,7 +65,7 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 
 - [x] **TEST-01**: Backend unit tests cover trade execution, P&L math, and edge cases (insufficient cash, overselling)
 - [ ] **TEST-02**: Backend unit tests cover LLM structured-output parsing, including malformed responses
-- [ ] **TEST-03**: Frontend unit tests cover price flash animation, watchlist CRUD, and portfolio display calculations
+- [x] **TEST-03**: Frontend unit tests cover price flash animation, watchlist CRUD, and portfolio display calculations
 - [ ] **TEST-04**: Playwright E2E suite (`test/`, `LLM_MOCK=true`) covers: fresh start, add/remove ticker, buy/sell trade flow, AI chat trade execution, SSE reconnection
 
 ## v2 Requirements
@@ -101,14 +101,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PORT-05 | Phase 2 | Complete |
 | PORT-06 | Phase 2 | Complete |
 | PORT-07 | Phase 2 | Complete |
-| PORT-08 | Phase 3 | Pending |
-| PORT-09 | Phase 3 | Pending |
+| PORT-08 | Phase 3 | Complete |
+| PORT-09 | Phase 3 | Complete |
 | PORT-10 | Phase 2 | Complete |
 | WATCH-01 | Phase 1 | Complete |
-| WATCH-02 | Phase 3 | Pending |
-| WATCH-03 | Phase 3 | Pending |
-| WATCH-04 | Phase 3 | Pending |
-| WATCH-05 | Phase 3 | Pending |
+| WATCH-02 | Phase 3 | Complete |
+| WATCH-03 | Phase 3 | Complete |
+| WATCH-04 | Phase 3 | Complete |
+| WATCH-05 | Phase 3 | Complete |
 | CHAT-01 | Phase 4 | Pending |
 | CHAT-02 | Phase 4 | Pending |
 | CHAT-03 | Phase 4 | Pending |
@@ -119,16 +119,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAT-08 | Phase 4 | Pending |
 | CHAT-09 | Phase 4 | Pending |
 | UI-01 | Phase 1 | Complete |
-| UI-02 | Phase 3 | Pending |
+| UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 2 | Complete |
-| UI-04 | Phase 3 | Pending |
+| UI-04 | Phase 3 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 5 | Pending |
 | INFRA-03 | Phase 5 | Pending |
 | INFRA-04 | Phase 5 | Pending |
 | TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 4 | Pending |
-| TEST-03 | Phase 3 | Pending |
+| TEST-03 | Phase 3 | Complete |
 | TEST-04 | Phase 5 | Pending |
 
 **Coverage:**
