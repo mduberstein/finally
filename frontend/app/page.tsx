@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
+import { Heatmap } from "@/components/Heatmap";
 import { PnlChart } from "@/components/PnlChart";
 import { PositionsTable } from "@/components/PositionsTable";
 import { TradeBar } from "@/components/TradeBar";
 import { Watchlist } from "@/components/Watchlist";
+import { deriveHeatmapItems } from "@/lib/heatmap";
 import { derivePortfolioValue, derivePositionRows } from "@/lib/portfolio";
 import { usePriceHistory } from "@/lib/usePriceHistory";
 import { usePriceStream } from "@/lib/usePriceStream";
@@ -83,6 +85,8 @@ export default function Home() {
     [portfolio, prices],
   );
 
+  const heatmapItems = useMemo(() => deriveHeatmapItems(positionRows), [positionRows]);
+
   const watchlistTickers = useMemo(
     () => watchlist?.map((entry) => entry.ticker) ?? [],
     [watchlist],
@@ -126,6 +130,7 @@ export default function Home() {
           onAdded={handleAdded}
           onRemove={handleRemove}
         />
+        <Heatmap items={heatmapItems} />
         <PositionsTable rows={positionRows} />
         <PnlChart points={portfolioHistory} />
       </main>
