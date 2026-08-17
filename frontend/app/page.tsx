@@ -11,6 +11,7 @@ import { TradeBar } from "@/components/TradeBar";
 import { Watchlist } from "@/components/Watchlist";
 import { deriveHeatmapItems } from "@/lib/heatmap";
 import { derivePortfolioValue, derivePositionRows } from "@/lib/portfolio";
+import { clearSelectionIfRemoved } from "@/lib/selection";
 import { usePriceHistory } from "@/lib/usePriceHistory";
 import { usePriceStream } from "@/lib/usePriceStream";
 import type { PortfolioSnapshot, PortfolioSnapshotPoint, WatchlistEntry } from "@/lib/types";
@@ -114,6 +115,7 @@ export default function Home() {
         // Removing a ticker touches only watchlist state — no portfolio
         // refetch, no cash/position mutation on this path.
         setWatchlist((current) => (current ?? []).filter((entry) => entry.ticker !== ticker));
+        setSelectedTicker((current) => clearSelectionIfRemoved(current, ticker));
       }
       return true;
     } catch {
