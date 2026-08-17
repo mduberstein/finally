@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/Header";
 import { Heatmap } from "@/components/Heatmap";
+import { MainChart } from "@/components/MainChart";
 import { PnlChart } from "@/components/PnlChart";
 import { PositionsTable } from "@/components/PositionsTable";
 import { TradeBar } from "@/components/TradeBar";
@@ -93,6 +94,12 @@ export default function Home() {
   );
   const history = usePriceHistory(prices, watchlistTickers);
 
+  const selectedPoints = selectedTicker ? (history[selectedTicker] ?? []) : [];
+  const selectedPrice = selectedTicker ? (prices[selectedTicker]?.price ?? null) : null;
+  const selectedChangePercent = selectedTicker
+    ? (prices[selectedTicker]?.change_percent ?? null)
+    : null;
+
   function handleAdded(entry: WatchlistEntry) {
     setWatchlist((current) => [...(current ?? []), entry]);
   }
@@ -129,6 +136,12 @@ export default function Home() {
           onSelectTicker={setSelectedTicker}
           onAdded={handleAdded}
           onRemove={handleRemove}
+        />
+        <MainChart
+          ticker={selectedTicker}
+          points={selectedPoints}
+          price={selectedPrice}
+          changePercent={selectedChangePercent}
         />
         <Heatmap items={heatmapItems} />
         <PositionsTable rows={positionRows} />
