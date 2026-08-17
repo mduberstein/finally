@@ -10,7 +10,7 @@ from starlette.concurrency import run_in_threadpool
 from app.market.cache import PriceCache
 
 from .models import TradeRejected
-from .service import execute_trade, get_portfolio
+from .service import execute_trade, get_portfolio, get_portfolio_history
 
 
 class TradeRequest(BaseModel):
@@ -35,6 +35,10 @@ def create_portfolio_router(cache: PriceCache) -> APIRouter:
     @router.get("/api/portfolio")
     async def portfolio() -> dict:
         return await run_in_threadpool(get_portfolio, cache)
+
+    @router.get("/api/portfolio/history")
+    async def portfolio_history() -> list[dict]:
+        return await run_in_threadpool(get_portfolio_history)
 
     @router.post("/api/portfolio/trade")
     async def trade(request: TradeRequest) -> dict:

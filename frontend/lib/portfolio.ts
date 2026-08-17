@@ -1,5 +1,12 @@
 import type { PortfolioSnapshot, PriceTick } from "./types";
 
+/**
+ * Mirrors the backend's `DEFAULT_CASH_BALANCE` seed constant. The P&L
+ * chart's up/down stroke rule (and any later comparison) reads this rather
+ * than restating `10000` inline in a component.
+ */
+export const STARTING_CASH_BALANCE = 10000;
+
 interface DerivedPortfolioValue {
   cash: number | null;
   positionsValue: number | null;

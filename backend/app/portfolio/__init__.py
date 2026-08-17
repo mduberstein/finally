@@ -9,7 +9,7 @@ from .models import (
     UntradableTickerError,
 )
 from .routes import create_portfolio_router
-from .service import execute_trade, get_portfolio
+from .service import execute_trade, get_portfolio, get_portfolio_history, record_portfolio_snapshot
 
 __all__ = [
     "InsufficientCashError",
@@ -21,4 +21,6 @@ __all__ = [
     "create_portfolio_router",
     "execute_trade",
     "get_portfolio",
+    "get_portfolio_history",
+    "record_portfolio_snapshot",
 ]
