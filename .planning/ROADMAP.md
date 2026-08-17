@@ -94,7 +94,7 @@ Plans:
   4. User can add and remove watchlist tickers; added tickers begin streaming prices, removed ones disappear from the grid
   5. Clicking a watchlist row loads that ticker into the main chart area, and the full layout — watchlist, main chart, heatmap, P&L chart, positions table, trade bar, chat panel, header — fits a wide desktop screen without excess scrolling and stays usable at tablet width
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
 
 Plans:
 **Wave 1**
@@ -115,7 +115,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 03-05-PLAN.md — The eight-panel terminal grid on desktop and tablet, with the reserved AI chat slot
+- [x] 03-05-PLAN.md — The eight-panel terminal grid on desktop and tablet, with the reserved AI chat slot
 
 **UI hint**: yes
 
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Live Streaming Terminal | 4/4 | Complete    | 2026-08-15 |
 | 2. Trading & Portfolio | 3/3 | Complete    | 2026-08-16 |
-| 3. Visual Terminal & Watchlist Control | 4/5 | In Progress|  |
+| 3. Visual Terminal & Watchlist Control | 5/5 | In Progress|  |
 | 4. AI Copilot | 0/TBD | Not started | - |
 | 5. One-Command Launch | 0/TBD | Not started | - |
 
