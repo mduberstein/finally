@@ -1,8 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WATCHLIST_ROW_GRID, WatchlistRow } from "@/components/WatchlistRow";
 import { WatchlistAddForm } from "@/components/WatchlistAddForm";
 import type { PricePoint } from "@/lib/priceHistory";
 import type { PriceTick, WatchlistEntry } from "@/lib/types";
+import { WATCHLIST_REQUEST_FAILED_MESSAGE } from "@/lib/watchlistForm";
 
 const SKELETON_ROW_COUNT = 10;
 
@@ -14,8 +18,16 @@ interface WatchlistProps {
   selectedTicker: string | null;
   onSelectTicker: (ticker: string) => void;
   onAdded: (entry: WatchlistEntry) => void;
+  onRemove: (ticker: string) => Promise<boolean>;
 }
 
+/**
+ * Removal is NOT optimistic: the request goes out, and only on success does
+ * the parent drop the row (via `onRemove`'s resolved watchlist state
+ * update). On failure the row stays in place and a brief inline error
+ * renders beneath that row, matching the add form's convention (UI-SPEC
+ * "watchlist add/remove: request failure").
+ */
 export function Watchlist({
   entries,
   prices,
@@ -23,8 +35,29 @@ export function Watchlist({
   selectedTicker,
   onSelectTicker,
   onAdded,
+  onRemove,
 }: WatchlistProps) {
   const existingTickers = entries?.map((entry) => entry.ticker) ?? [];
+  const [removingTicker, setRemovingTicker] = useState<string | null>(null);
+  const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
+
+  async function handleRemove(ticker: string) {
+    setRemovingTicker(ticker);
+    setRowErrors((current) => {
+      if (!(ticker in current)) return current;
+      const next = { ...current };
+      delete next[ticker];
+      return next;
+    });
+    try {
+      const removed = await onRemove(ticker);
+      if (!removed) {
+        setRowErrors((current) => ({ ...current, [ticker]: WATCHLIST_REQUEST_FAILED_MESSAGE }));
+      }
+    } finally {
+      setRemovingTicker(null);
+    }
+  }
 
   return (
     <section className="rounded-md border border-border bg-card p-6">
@@ -66,17 +99,26 @@ export function Watchlist({
             const price = live?.price ?? entry.price;
             const changePercent = live?.change_percent ?? entry.change_percent;
             const direction = live?.direction ?? entry.direction;
+            const rowError = rowErrors[entry.ticker];
             return (
-              <WatchlistRow
-                key={entry.ticker}
-                ticker={entry.ticker}
-                price={price}
-                changePercent={changePercent}
-                direction={direction}
-                points={history[entry.ticker] ?? []}
-                selected={entry.ticker === selectedTicker}
-                onSelect={() => onSelectTicker(entry.ticker)}
-              />
+              <div key={entry.ticker}>
+                <WatchlistRow
+                  ticker={entry.ticker}
+                  price={price}
+                  changePercent={changePercent}
+                  direction={direction}
+                  points={history[entry.ticker] ?? []}
+                  selected={entry.ticker === selectedTicker}
+                  onSelect={() => onSelectTicker(entry.ticker)}
+                  onRemove={() => void handleRemove(entry.ticker)}
+                  removing={removingTicker === entry.ticker}
+                />
+                {rowError && (
+                  <p className="text-body px-4 text-down" role="alert">
+                    {rowError}
+                  </p>
+                )}
+              </div>
             );
           })}
         </div>

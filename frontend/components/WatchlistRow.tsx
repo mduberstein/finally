@@ -1,3 +1,5 @@
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { PriceCell } from "@/components/PriceCell";
 import { Sparkline } from "@/components/Sparkline";
 import type { PricePoint } from "@/lib/priceHistory";
@@ -12,6 +14,8 @@ interface WatchlistRowProps {
   points?: PricePoint[];
   selected?: boolean;
   onSelect?: () => void;
+  onRemove?: () => void;
+  removing?: boolean;
 }
 
 /** Grid template shared with the column-header row so cells stay aligned:
@@ -27,6 +31,8 @@ export function WatchlistRow({
   points = [],
   selected = false,
   onSelect,
+  onRemove,
+  removing = false,
 }: WatchlistRowProps) {
   return (
     <div
@@ -50,6 +56,19 @@ export function WatchlistRow({
       <span className="text-label text-foreground">{ticker}</span>
       <PriceCell price={price ?? null} changePercent={changePercent ?? null} direction={direction} />
       <Sparkline points={points} />
+      <Button
+        variant="ghost"
+        size="icon"
+        disabled={removing}
+        aria-label={`Remove ${ticker} from watchlist`}
+        onClick={(event) => {
+          event.stopPropagation();
+          onRemove?.();
+        }}
+        className="text-muted-foreground hover:text-foreground"
+      >
+        <X size={14} />
+      </Button>
     </div>
   );
 }

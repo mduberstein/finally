@@ -68,6 +68,22 @@ export default function Home() {
     setWatchlist((current) => [...(current ?? []), entry]);
   }
 
+  async function handleRemove(ticker: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/watchlist/${ticker}`, { method: "DELETE" });
+      if (!response.ok) return false;
+      const body = (await response.json()) as { removed: boolean };
+      if (body.removed) {
+        // Removing a ticker touches only watchlist state — no portfolio
+        // refetch, no cash/position mutation on this path.
+        setWatchlist((current) => (current ?? []).filter((entry) => entry.ticker !== ticker));
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header status={status} cash={cash} totalValue={totalValue} />
@@ -83,6 +99,7 @@ export default function Home() {
           selectedTicker={selectedTicker}
           onSelectTicker={setSelectedTicker}
           onAdded={handleAdded}
+          onRemove={handleRemove}
         />
         <PositionsTable rows={positionRows} />
       </main>
