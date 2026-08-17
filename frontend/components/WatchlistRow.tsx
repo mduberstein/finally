@@ -48,7 +48,7 @@ export function WatchlistRow({
       }}
       className={cn(
         WATCHLIST_ROW_GRID,
-        "cursor-pointer border-l-2 px-4 py-3 outline-none transition-colors",
+        "cursor-pointer border-l-2 px-2 py-3 outline-none transition-colors",
         "hover:border-l-primary focus-visible:border-l-primary focus-visible:ring-2 focus-visible:ring-ring",
         selected ? "border-l-primary bg-accent/40" : "border-l-transparent",
       )}
