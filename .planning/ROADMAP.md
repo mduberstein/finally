@@ -94,24 +94,28 @@ Plans:
   4. User can add and remove watchlist tickers; added tickers begin streaming prices, removed ones disappear from the grid
   5. Clicking a watchlist row loads that ticker into the main chart area, and the full layout — watchlist, main chart, heatmap, P&L chart, positions table, trade bar, chat panel, header — fits a wide desktop screen without excess scrolling and stays usable at tablet width
 
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — Tracer: add and remove watchlist tickers end-to-end, each row growing a live sparkline
+- [ ] 03-01-PLAN.md — Backend tracer: watchlist add and remove reach SQLite and the live feed's ticker list
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-02-PLAN.md — Portfolio value over time: post-trade and 30s snapshots, history endpoint, P&L chart
+- [ ] 03-02-PLAN.md — Frontend tracer: inline add form, per-row remove control, and a sparkline growing in every row
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 03-03-PLAN.md — Portfolio heatmap sized by weight and coloured by P&L, plus the click-to-select main chart
+- [ ] 03-03-PLAN.md — Portfolio value over time: post-trade and 30s snapshots, history endpoint, P&L chart
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 03-04-PLAN.md — The eight-panel terminal grid on desktop and tablet, with the reserved AI chat slot
+- [ ] 03-04-PLAN.md — Portfolio heatmap sized by weight and coloured by P&L, plus the click-to-select main chart
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 03-05-PLAN.md — The eight-panel terminal grid on desktop and tablet, with the reserved AI chat slot
 
 **UI hint**: yes
 
