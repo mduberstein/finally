@@ -1,4 +1,6 @@
 import { PriceCell } from "@/components/PriceCell";
+import { Sparkline } from "@/components/Sparkline";
+import type { PricePoint } from "@/lib/priceHistory";
 import type { PriceTick } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -7,18 +9,22 @@ interface WatchlistRowProps {
   price?: number | null;
   changePercent?: number | null;
   direction?: PriceTick["direction"] | null;
+  points?: PricePoint[];
   selected?: boolean;
   onSelect?: () => void;
 }
 
-/** Grid template shared with the column-header row so cells stay aligned. */
-export const WATCHLIST_ROW_GRID = "grid grid-cols-[1fr_120px_100px] items-center gap-4";
+/** Grid template shared with the column-header row so cells stay aligned:
+ * ticker, price, percent, sparkline, and the remove-control slot. */
+export const WATCHLIST_ROW_GRID =
+  "grid grid-cols-[minmax(48px,1fr)_88px_72px_96px_28px] items-center gap-2";
 
 export function WatchlistRow({
   ticker,
   price,
   changePercent,
   direction = null,
+  points = [],
   selected = false,
   onSelect,
 }: WatchlistRowProps) {
@@ -43,6 +49,7 @@ export function WatchlistRow({
     >
       <span className="text-label text-foreground">{ticker}</span>
       <PriceCell price={price ?? null} changePercent={changePercent ?? null} direction={direction} />
+      <Sparkline points={points} />
     </div>
   );
 }

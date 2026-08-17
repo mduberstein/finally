@@ -1,5 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { WATCHLIST_ROW_GRID, WatchlistRow } from "@/components/WatchlistRow";
+import { WatchlistAddForm } from "@/components/WatchlistAddForm";
+import type { PricePoint } from "@/lib/priceHistory";
 import type { PriceTick, WatchlistEntry } from "@/lib/types";
 
 const SKELETON_ROW_COUNT = 10;
@@ -8,19 +10,34 @@ interface WatchlistProps {
   /** `null` means the initial fetch hasn't resolved yet — renders skeleton rows. */
   entries: WatchlistEntry[] | null;
   prices: Record<string, PriceTick>;
+  history: Record<string, PricePoint[]>;
   selectedTicker: string | null;
   onSelectTicker: (ticker: string) => void;
+  onAdded: (entry: WatchlistEntry) => void;
 }
 
-export function Watchlist({ entries, prices, selectedTicker, onSelectTicker }: WatchlistProps) {
+export function Watchlist({
+  entries,
+  prices,
+  history,
+  selectedTicker,
+  onSelectTicker,
+  onAdded,
+}: WatchlistProps) {
+  const existingTickers = entries?.map((entry) => entry.ticker) ?? [];
+
   return (
     <section className="rounded-md border border-border bg-card p-6">
       <h2 className="text-heading mb-4 text-foreground">Watchlist</h2>
+
+      <WatchlistAddForm existing={existingTickers} onAdded={onAdded} />
 
       <div className={`${WATCHLIST_ROW_GRID} px-4 pb-2 text-label text-muted-foreground`}>
         <span>TICKER</span>
         <span className="text-right">PRICE</span>
         <span className="text-right">CHG %</span>
+        <span />
+        <span />
       </div>
 
       {entries === null ? (
@@ -30,6 +47,8 @@ export function Watchlist({ entries, prices, selectedTicker, onSelectTicker }: W
               <Skeleton className="h-4 w-12" />
               <Skeleton className="h-6 w-20 justify-self-end" />
               <Skeleton className="h-4 w-14 justify-self-end" />
+              <Skeleton className="h-4 w-full" />
+              <span />
             </div>
           ))}
         </div>
@@ -54,6 +73,7 @@ export function Watchlist({ entries, prices, selectedTicker, onSelectTicker }: W
                 price={price}
                 changePercent={changePercent}
                 direction={direction}
+                points={history[entry.ticker] ?? []}
                 selected={entry.ticker === selectedTicker}
                 onSelect={() => onSelectTicker(entry.ticker)}
               />
