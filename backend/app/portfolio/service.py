@@ -26,6 +26,13 @@ SNAPSHOT_HISTORY_LIMIT = 1000
 30-second interval snapshots — so payload and chart size stay bounded
 regardless of how long the app has been running."""
 
+_QUANTITY_EPSILON = 1e-9
+"""Share quantities at or below this threshold are treated as a closed
+position. This absorbs the ~1e-17 float subtraction residue left when a
+fractional sell fully closes a fractional holding (binary float subtraction
+rarely lands on exact 0.0). 1e-9 shares is economically zero even at a
+four-figure share price."""
+
 
 def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) -> TradeResult:
     """Fill a trade at the current cached price and commit it atomically.
@@ -252,9 +259,14 @@ def _apply_sell(
     position: sqlite3.Row | None,
 ) -> None:
     """Reduce or remove a position on a sell. `avg_cost` is left untouched —
-    it records what was paid for the shares still held, not the sale."""
+    it records what was paid for the shares still held, not the sale.
+
+    `execute_trade`'s oversell guard (`quantity > owned`) rejects the trade
+    before this function runs, so `new_quantity` is provably never negative —
+    that is what licenses the one-sided `<=` comparison below with no
+    `abs()`."""
     new_quantity = position["quantity"] - quantity
-    if new_quantity == 0:
+    if new_quantity <= _QUANTITY_EPSILON:
         conn.execute("DELETE FROM positions WHERE id = ?", (position["id"],))
         return
 

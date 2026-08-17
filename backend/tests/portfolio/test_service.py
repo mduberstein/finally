@@ -141,6 +141,44 @@ class TestExecuteTradeSell:
         portfolio = get_portfolio(cache)
         assert portfolio["positions"] == []
 
+    def test_fractional_sell_leaving_float_residual_removes_position_row(
+        self, tmp_path, monkeypatch
+    ):
+        """WR-02: a fractional sell that exactly closes a fractional position
+        must delete the `positions` row even though binary float subtraction
+        leaves a nonzero residual (observed: 5.551115123125783e-17) instead
+        of exact 0.0."""
+        _use_tmp_db(tmp_path, monkeypatch)
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 190.0)])
+        execute_trade("AAPL", "buy", 0.1, cache)
+        execute_trade("AAPL", "buy", 0.1, cache)
+        execute_trade("AAPL", "buy", 0.1, cache)
+
+        with database.connect() as conn:
+            row = conn.execute("SELECT quantity FROM positions").fetchone()
+        assert row["quantity"] > 0.3
+
+        execute_trade("AAPL", "sell", 0.3, cache)
+
+        portfolio = get_portfolio(cache)
+        assert portfolio["positions"] == []
+        with database.connect() as conn:
+            rows = conn.execute("SELECT * FROM positions").fetchall()
+        assert rows == []
+
+    def test_remainder_far_above_epsilon_keeps_the_position_row(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 190.0)])
+        execute_trade("AAPL", "buy", 0.5, cache)
+
+        execute_trade("AAPL", "sell", 0.4999999, cache)
+
+        portfolio = get_portfolio(cache)
+        assert len(portfolio["positions"]) == 1
+        assert portfolio["positions"][0]["quantity"] == pytest.approx(1e-7)
+
     def test_oversell_by_one_share_raises_insufficient_shares(
         self, tmp_path, monkeypatch
     ):
