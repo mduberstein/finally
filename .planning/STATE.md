@@ -2,43 +2,43 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 02
-current_phase_name: Trading & Portfolio
-status: executing
+current_phase: 3
+current_phase_name: Visual Terminal & Watchlist Control
+status: planning
 stopped_at: Phase 2 UI-SPEC approved
-last_updated: "2026-08-16T04:14:45.237Z"
+last_updated: "2026-08-17T02:41:50.202Z"
 last_activity: 2026-08-16
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 7
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-12)
+See: .planning/PROJECT.md (updated 2026-08-16)
 
 **Core value:** A user can watch live prices stream, trade a simulated portfolio, and have an AI assistant execute trades and manage the watchlist through natural language — all in one fluid, visually polished terminal-style interface.
-**Current focus:** Phase 02 — Trading & Portfolio
+**Current focus:** Phase 3 — Visual Terminal & Watchlist Control
 
 ## Current Position
 
-Phase: 02 (Trading & Portfolio) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 02
-Last activity: 2026-08-16 — Phase 02 execution started
+Phase: 3 — Visual Terminal & Watchlist Control
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-16 — Phase 02 complete, transitioned to Phase 3
 
-Progress: [████████████████████] 4/4 plans (100%) — Phase 1 of 5 complete
+Progress: [████████████████████] 7/7 plans (100%) — Phases 1-2 of 5 complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4
+- Total plans completed: 7
 - Average duration: —
 - Total execution time: —
 
@@ -47,6 +47,7 @@ Progress: [████████████████████] 4/4 pla
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 4 | - | - |
+| 02 | 3 | - | - |
 
 **Recent Trend:**
 
@@ -75,6 +76,8 @@ None yet.
 
 - REQUIREMENTS.md originally stated "38 total" v1 requirements; the actual enumerated count is 40 (MARKET 4, PORT 10, WATCH 5, CHAT 9, UI 4, INFRA 4, TEST 4). Coverage section corrected to 40 during roadmap creation.
 - [Phase 1] Accepted risks to revisit later (see `01-SECURITY.md`): error responses have no secrets today but revisit at Phase 5 container publish (T-01-06); SSE endpoint has no auth surface, revisit if Phase 5 exposes beyond localhost (T-01-07); frontend holds no secrets, revisit at Phase 4 chat panel (T-01-09).
+- [Phase 2] Accepted risks to revisit later (see `02-SECURITY.md`): trade rejection detail carries user's own cash/share data only, revisit at Phase 5 container publish (T-02-06); no rate limit on trade submissions, revisit if Phase 5 exposes beyond localhost (T-02-10); per-tick position recompute cost, revisit at Phase 3 heatmap/sparklines (T-02-13).
+- PORT-08 (heatmap) and PORT-09 (P&L chart + `portfolio_snapshots` writer) are explicitly Phase 3 scope, not Phase 2 — deferred by design, not a gap.
 
 ## Deferred Items
 
@@ -86,17 +89,19 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-16T02:26:54.980Z
-Stopped at: Phase 2 UI-SPEC approved
-Resume file: .planning/phases/02-trading-portfolio/02-UI-SPEC.md
+Last session: 2026-08-16T07:15:00.000Z
+Stopped at: Phase 2 complete, ready to plan Phase 3
+Resume file: None
 
-### Phase 1 close-out summary
+### Phase 2 close-out summary
 
-- All 4 plans (01-01..01-04) executed and merged. Code review found 6 issues (CR-01, WR-01..WR-05), all fixed.
-- UAT: 5/5 tests passed (`01-UAT.md`). One issue reported mid-session (reduced-motion tint not suppressing) was diagnosed by a debug agent as no code defect — did not reproduce in Chrome Incognito or Firefox; root cause was environmental (likely a DevTools media-emulation override in the original test browser).
-- Security: `01-SECURITY.md` created, 14 threats registered across the phase's 4 plan-time threat models, all closed (9 mitigated + verified in code, 5 accepted risks documented), `threats_open: 0`.
-- Environment note: this machine's `next build` (Turbopack, default) fails with `TurbopackInternalError: ... binding to a port ... Operation not permitted` — a local OS port-binding permission quirk, confirmed NOT a code defect (`next build --webpack` builds cleanly on identical code).
+- 3 plans (02-01..02-03) executed across 2 waves, merged via worktree isolation. Code review found 3 warnings (concurrency error masking, missing self-validation in `execute_trade`, shared test-fixture leak), all fixed.
+- UAT: 4/4 tests passed (`02-UAT.md`) — backend-disconnect resilience, trade-bar error states, positions table live behavior, judgment-tier prohibitions sign-off.
+- Security: `02-SECURITY.md` created, 13 threats registered across the phase's 3 plan-time threat models, all closed (9 mitigated + verified in code, 4 accepted risks documented), `threats_open: 0`.
+- Live end-to-end HTTP smoke test performed during verification: fresh portfolio → buy → oversell rejection → untradable-ticker rejection → sell, all confirmed against a real temporary SQLite DB.
+- 199 total tests passing (139 backend + 60 frontend), no regressions from Phase 1.
+- Environment note: `uv run` must be invoked from `backend/` (not repo root) or it silently resolves to Anaconda's Python and fails with `ModuleNotFoundError`. Same for `next build` — use `npx next build --webpack` (Turbopack fails on this machine, documented in Phase 1 notes).
 
 ### To resume
 
-Phase 2 (Trading & Portfolio) has not been planned yet. Run `/gsd-discuss-phase 2` to gather context, or `/gsd-plan-phase 2` to plan directly.
+Phase 3 (Visual Terminal & Watchlist Control) has not been planned yet. Run `/gsd-discuss-phase 3` to gather context, or `/gsd-plan-phase 3` to plan directly.

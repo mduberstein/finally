@@ -22,20 +22,24 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 - ✓ Price flash animations (green/red, fade ~500ms) driven by the SSE stream — Phase 1 (MARKET-02)
 - ✓ Connection status indicator (green/yellow/red, with staleness-aware recovery) — Phase 1 (MARKET-03)
 - ✓ Dark terminal visual theme (colors per PLAN.md) built with Tailwind CSS — Phase 1 (UI-01)
+- ✓ Portfolio API: `GET /api/portfolio`, `POST /api/portfolio/trade` (server-authoritative price, HTTP-agnostic `execute_trade` for future Phase 4 reuse) — Phase 2 (PORT-01..05)
+- ✓ Trade execution logic: market orders, instant fill, whole-share cash/position validation, `BEGIN IMMEDIATE`-serialized concurrency — Phase 2 (PORT-02..05)
+- ✓ Positions table with live price/P&L/% change overlay — Phase 2 (PORT-06, PORT-07)
+- ✓ Trade bar with inline (never toast/modal) error copy — Phase 2 (UI-03)
+- ✓ Append-only trade history — Phase 2 (PORT-10)
+- ✓ Backend unit tests: trade execution, P&L math, concurrency, edge cases — Phase 2 (TEST-01)
 
 ### Active
 
-- [ ] Portfolio API: `GET /api/portfolio`, `POST /api/portfolio/trade`, `GET /api/portfolio/history`
+- [ ] `GET /api/portfolio/history` + portfolio snapshot background task (every 30s + immediately after each trade) — deferred to Phase 3 (PORT-09)
 - [ ] Watchlist write API: `POST /api/watchlist`, `DELETE /api/watchlist/{ticker}`
-- [ ] Trade execution logic: market orders, instant fill, cash/position validation, avg cost tracking
-- [ ] Portfolio snapshot background task (every 30s + immediately after each trade)
 - [ ] LLM chat integration: `POST /api/chat` via LiteLLM → OpenRouter (Cerebras, `gpt-oss-120b`), structured output schema, auto-executed trades/watchlist changes
 - [ ] `LLM_MOCK` deterministic mode for testing
-- [ ] Remaining frontend surfaces — sparkline mini-charts, main chart, portfolio heatmap, P&L chart, positions table, trade bar, AI chat panel (watchlist grid + header shipped in Phase 1)
+- [ ] Remaining frontend surfaces — sparkline mini-charts, main chart, portfolio heatmap, P&L chart, AI chat panel (watchlist grid, header, trade bar, positions table shipped in Phases 1-2)
 - [ ] Multi-stage Dockerfile (Node build → Python runtime) serving static frontend + API on port 8000
 - [ ] `docker-compose.yml` convenience wrapper
 - [ ] Start/stop scripts (mac + windows)
-- [ ] Backend unit tests: portfolio math, LLM structured-output parsing, API routes
+- [ ] Backend unit tests: LLM structured-output parsing (portfolio/trade tests shipped Phase 2)
 - [ ] Frontend unit tests: component rendering, watchlist CRUD, chat rendering
 - [ ] Playwright E2E suite in `test/` with `docker-compose.test.yml`, `LLM_MOCK=true` scenarios
 
@@ -77,6 +81,9 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 | AI Integration Phase workflow toggle left off | User's explicit choice in `/gsd-settings`; framework already fixed by PLAN.md (LiteLLM/OpenRouter/Cerebras), so framework-selection research isn't needed | — Pending |
 | Watchlist rows use `<div role="button">` with `tabindex`/focus-ring styling rather than semantic `<button>` | Lets the grid-column layout (ticker / price / change%) render as CSS grid children directly, keeping keyboard/AT accessibility via ARIA role instead of native button box model | ✓ Shipped Phase 1 — verified hover/focus accent-blue affordances live |
 | Connection health derives from a periodic staleness tick plus real EventSource events, not `readyState` alone | A wedged-but-open SSE socket must downgrade to "Reconnecting" instead of showing a false-green "Connected" over frozen prices (T-01-12) | ✓ Shipped Phase 1 |
+| Trades fill at a server-authoritative price read from `PriceCache` inside the transaction; the client can never supply a price | Matches PLAN.md's "instant fill at current market price" and closes a client-price-tampering threat (T-02-02) before it opens | ✓ Shipped Phase 2 |
+| Trade bar accepts only watchlist tickers and whole-share quantities; `execute_trade()` itself stays float-typed and HTTP-agnostic | Keeps Phase 2 simple (no arbitrary-ticker lookup, no fractional-share UI) while leaving the service function ready for Phase 4's LLM-initiated trades to call directly | ✓ Shipped Phase 2 |
+| Concurrent trades serialized via SQLite `BEGIN IMMEDIATE` before the first read | Prevents a lost-update race where two near-simultaneous trades validate against stale cash/position state (T-02-03/T-02-07) | ✓ Shipped Phase 2 |
 
 ## Evolution
 
@@ -96,4 +103,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-16 after Phase 1*
+*Last updated: 2026-08-16 after Phase 2*
