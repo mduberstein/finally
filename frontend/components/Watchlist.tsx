@@ -60,12 +60,12 @@ export function Watchlist({
   }
 
   return (
-    <section className="rounded-md border border-border bg-card p-6">
+    <section className="rounded-md border border-border bg-card p-4">
       <h2 className="text-heading mb-4 text-foreground">Watchlist</h2>
 
       <WatchlistAddForm existing={existingTickers} onAdded={onAdded} />
 
-      <div className={`${WATCHLIST_ROW_GRID} px-4 pb-2 text-label text-muted-foreground`}>
+      <div className={`${WATCHLIST_ROW_GRID} px-2 pb-2 text-label text-muted-foreground`}>
         <span>TICKER</span>
         <span className="text-right">PRICE</span>
         <span className="text-right">CHG %</span>
@@ -76,7 +76,7 @@ export function Watchlist({
       {entries === null ? (
         <div className="flex flex-col gap-2">
           {Array.from({ length: SKELETON_ROW_COUNT }).map((_, index) => (
-            <div key={index} className={`${WATCHLIST_ROW_GRID} px-4 py-3`}>
+            <div key={index} className={`${WATCHLIST_ROW_GRID} px-2 py-3`}>
               <Skeleton className="h-4 w-12" />
               <Skeleton className="h-6 w-20 justify-self-end" />
               <Skeleton className="h-4 w-14 justify-self-end" />
@@ -114,7 +114,7 @@ export function Watchlist({
                   removing={removingTicker === entry.ticker}
                 />
                 {rowError && (
-                  <p className="text-body px-4 text-down" role="alert">
+                  <p className="text-body px-2 text-down" role="alert">
                     {rowError}
                   </p>
                 )}
