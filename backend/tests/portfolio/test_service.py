@@ -11,7 +11,12 @@ from app.portfolio.models import (
     InsufficientSharesError,
     UntradableTickerError,
 )
-from app.portfolio.service import execute_trade, get_portfolio
+from app.portfolio.service import (
+    execute_trade,
+    get_portfolio,
+    get_portfolio_history,
+    record_portfolio_snapshot,
+)
 
 
 def _use_tmp_db(tmp_path, monkeypatch):
@@ -284,3 +289,119 @@ class TestConcurrentTrades:
 
         portfolio = get_portfolio(cache)
         assert portfolio["cash_balance"] == pytest.approx(10000.0 - 6000.0)
+
+
+class TestTradeSnapshots:
+    def test_buy_writes_exactly_one_snapshot_row_matching_executed_at(
+        self, tmp_path, monkeypatch
+    ):
+        _use_tmp_db(tmp_path, monkeypatch)
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 190.0)])
+
+        result = execute_trade("AAPL", "buy", 10, cache)
+
+        with database.connect() as conn:
+            rows = conn.execute("SELECT recorded_at FROM portfolio_snapshots").fetchall()
+        assert len(rows) == 1
+        assert rows[0]["recorded_at"] == result.executed_at
+
+    def test_snapshot_total_value_prices_every_position_not_just_the_traded_one(
+        self, tmp_path, monkeypatch
+    ):
+        _use_tmp_db(tmp_path, monkeypatch)
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 100.0), _quote("GOOGL", 50.0)])
+        execute_trade("AAPL", "buy", 10, cache)
+
+        cache.apply([_quote("GOOGL", 60.0)])
+        result = execute_trade("GOOGL", "buy", 5, cache)
+
+        with database.connect() as conn:
+            rows = conn.execute(
+                "SELECT total_value FROM portfolio_snapshots ORDER BY rowid"
+            ).fetchall()
+        assert len(rows) == 2
+        expected_total = result.cash_balance + 10 * 100.0 + 5 * 60.0
+        assert rows[-1]["total_value"] == pytest.approx(expected_total)
+
+    def test_rejected_trade_writes_no_snapshot_row(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 1000.01)])
+
+        with pytest.raises(InsufficientCashError):
+            execute_trade("AAPL", "buy", 10, cache)
+
+        with database.connect() as conn:
+            rows = conn.execute("SELECT * FROM portfolio_snapshots").fetchall()
+        assert rows == []
+
+
+class TestGetPortfolioHistory:
+    def test_fresh_database_returns_empty_list(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+
+        assert get_portfolio_history() == []
+
+    def test_returns_rows_ascending_by_recorded_at_after_interleaved_trades(
+        self, tmp_path, monkeypatch
+    ):
+        _use_tmp_db(tmp_path, monkeypatch)
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 100.0)])
+        execute_trade("AAPL", "buy", 1, cache)
+
+        cache.apply([_quote("AAPL", 110.0)])
+        execute_trade("AAPL", "buy", 1, cache)
+
+        cache.apply([_quote("AAPL", 120.0)])
+        execute_trade("AAPL", "sell", 1, cache)
+
+        history = get_portfolio_history()
+
+        assert len(history) == 3
+        recorded_ats = [point["recorded_at"] for point in history]
+        assert recorded_ats == sorted(recorded_ats)
+
+    def test_two_snapshots_with_identical_recorded_at_both_survive_in_stable_order(
+        self, tmp_path, monkeypatch
+    ):
+        _use_tmp_db(tmp_path, monkeypatch)
+        same_timestamp = "2026-01-01T00:00:00+00:00"
+        with database.connect() as conn, conn:
+            conn.execute(
+                "INSERT INTO portfolio_snapshots (id, user_id, total_value, recorded_at) "
+                "VALUES (?, 'default', ?, ?)",
+                ("snap-a", 10000.0, same_timestamp),
+            )
+            conn.execute(
+                "INSERT INTO portfolio_snapshots (id, user_id, total_value, recorded_at) "
+                "VALUES (?, 'default', ?, ?)",
+                ("snap-b", 10500.0, same_timestamp),
+            )
+
+        history = get_portfolio_history()
+
+        assert len(history) == 2
+        assert [point["total_value"] for point in history] == [10000.0, 10500.0]
+
+
+class TestRecordPortfolioSnapshot:
+    def test_records_a_row_valuing_cash_plus_every_position_at_cached_prices(
+        self, tmp_path, monkeypatch
+    ):
+        _use_tmp_db(tmp_path, monkeypatch)
+        cache = PriceCache()
+        cache.apply([_quote("AAPL", 100.0), _quote("GOOGL", 50.0)])
+        execute_trade("AAPL", "buy", 10, cache)
+        execute_trade("GOOGL", "buy", 4, cache)
+
+        cache.apply([_quote("AAPL", 120.0), _quote("GOOGL", 55.0)])
+        total = record_portfolio_snapshot(cache)
+
+        portfolio = get_portfolio(cache)
+        assert total == pytest.approx(portfolio["total_value"])
+        with database.connect() as conn:
+            rows = conn.execute("SELECT total_value FROM portfolio_snapshots").fetchall()
+        assert any(row["total_value"] == pytest.approx(total) for row in rows)

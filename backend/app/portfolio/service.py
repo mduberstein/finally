@@ -21,6 +21,11 @@ from .models import (
     UntradableTickerError,
 )
 
+SNAPSHOT_HISTORY_LIMIT = 1000
+"""Bounds `get_portfolio_history`'s response — roughly eight hours of
+30-second interval snapshots — so payload and chart size stay bounded
+regardless of how long the app has been running."""
+
 
 def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) -> TradeResult:
     """Fill a trade at the current cached price and commit it atomically.
@@ -67,6 +72,8 @@ def execute_trade(ticker: str, side: str, quantity: float, cache: PriceCache) ->
             executed_at = datetime.now(UTC).isoformat()
             _insert_trade(conn, ticker, side, quantity, price, executed_at)
             _write_cash_balance(conn, new_cash_balance)
+            total_value = new_cash_balance + _positions_value(conn, cache)
+            _insert_snapshot(conn, total_value, executed_at)
             conn.execute("COMMIT")
         except Exception:
             if began:
@@ -106,6 +113,70 @@ def get_portfolio(cache: PriceCache) -> dict:
         "total_value": cash_balance + positions_value,
         "positions": positions,
     }
+
+
+def record_portfolio_snapshot(cache: PriceCache) -> float:
+    """Record one standalone portfolio-value snapshot and return its total.
+
+    Opens its own connection rather than accepting one, so a caller outside
+    a request — the 30-second background writer — can call this directly
+    with no transaction of its own to share.
+    """
+    with closing(connect()) as conn, conn:
+        cash_balance = _read_cash_balance(conn)
+        total_value = cash_balance + _positions_value(conn, cache)
+        recorded_at = datetime.now(UTC).isoformat()
+        _insert_snapshot(conn, total_value, recorded_at)
+    return total_value
+
+
+def get_portfolio_history(limit: int = SNAPSHOT_HISTORY_LIMIT) -> list[dict]:
+    """Return the most recent `limit` snapshots in chronological order.
+
+    Selects newest-first bounded by `limit`, then reverses to ascending
+    order. The `rowid` tie-break keeps two snapshots recorded in the same
+    instant — the interval writer and a trade landing together — in a
+    stable order instead of an arbitrary one; both rows persist
+    independently since the table is append-only. Zero rows returns an
+    empty list, never a synthesized starting point.
+    """
+    with closing(connect()) as conn:
+        rows = conn.execute(
+            "SELECT total_value, recorded_at FROM portfolio_snapshots "
+            "WHERE user_id = ? ORDER BY recorded_at DESC, rowid DESC LIMIT ?",
+            (DEFAULT_USER_ID, limit),
+        ).fetchall()
+    return [
+        {"total_value": row["total_value"], "recorded_at": row["recorded_at"]}
+        for row in reversed(rows)
+    ]
+
+
+def _positions_value(conn: sqlite3.Connection, cache: PriceCache) -> float:
+    """Sum `quantity * current cached price` across every open position.
+
+    Skips positions with no cached price, mirroring `get_portfolio`'s
+    valuation loop exactly — a snapshot must value every open position,
+    not just the ticker just traded, or `total_value` silently drifts.
+    """
+    rows = conn.execute(
+        "SELECT ticker, quantity FROM positions WHERE user_id = ?",
+        (DEFAULT_USER_ID,),
+    ).fetchall()
+    value = 0.0
+    for row in rows:
+        update = cache.get(row["ticker"])
+        if update is not None:
+            value += row["quantity"] * update.price
+    return value
+
+
+def _insert_snapshot(conn: sqlite3.Connection, total_value: float, recorded_at: str) -> None:
+    conn.execute(
+        "INSERT INTO portfolio_snapshots (id, user_id, total_value, recorded_at) "
+        "VALUES (?, ?, ?, ?)",
+        (uuid.uuid4().hex, DEFAULT_USER_ID, total_value, recorded_at),
+    )
 
 
 def _position_entry(row: sqlite3.Row, cache: PriceCache) -> dict:

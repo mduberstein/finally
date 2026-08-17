@@ -137,3 +137,37 @@ class TestTradeRequestModel:
         from app.portfolio.routes import TradeRequest
 
         assert "price" not in TradeRequest.model_fields
+
+
+class TestGetPortfolioHistory:
+    def test_fresh_database_returns_200_and_empty_array(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+        with TestClient(app) as client:
+            response = client.get("/api/portfolio/history")
+
+        assert response.status_code == 200
+        assert response.json() == []
+
+    def test_after_one_trade_returns_200_and_array_of_length_one_with_total_value_and_recorded_at(
+        self, tmp_path, monkeypatch
+    ):
+        _use_tmp_db(tmp_path, monkeypatch)
+        with TestClient(app) as client:
+            for _ in range(50):
+                if client.app.state.prices.snapshot():
+                    break
+                time.sleep(0.05)
+            ticker = client.app.state.prices.snapshot()[0].ticker
+
+            client.post(
+                "/api/portfolio/trade",
+                json={"ticker": ticker, "side": "buy", "quantity": 1},
+            )
+
+            response = client.get("/api/portfolio/history")
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body) == 1
+        assert "total_value" in body[0]
+        assert "recorded_at" in body[0]

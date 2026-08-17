@@ -49,3 +49,8 @@ export interface TradeResult {
   executed_at: string;
   cash_balance: number;
 }
+
+export interface PortfolioSnapshotPoint {
+  total_value: number;
+  recorded_at: string;
+}

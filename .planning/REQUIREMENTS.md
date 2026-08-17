@@ -24,7 +24,7 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 - [x] **PORT-06**: User can view a positions table: ticker, quantity, avg cost, current price, unrealized P&L, % change
 - [x] **PORT-07**: User can view total portfolio value (cash + position value) updating live in the header
 - [ ] **PORT-08**: User can view a portfolio heatmap (treemap) sized by position weight, colored by P&L
-- [ ] **PORT-09**: User can view a P&L chart of total portfolio value over time, recorded every 30s and after each trade
+- [x] **PORT-09**: User can view a P&L chart of total portfolio value over time, recorded every 30s and after each trade
 - [x] **PORT-10**: Trade history is recorded append-only in the trades table
 
 ### Watchlist
