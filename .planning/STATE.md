@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-08-17)
 Phase: 4 — AI Copilot
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-08-17 — Phase 03 complete, transitioned to Phase 4
+Last activity: 2026-08-17 - Completed quick task 260817-lcw: Fix page.tsx watchlist remove handler to clear selectedTicker when the removed ticker is the currently-selected one (WR-03 from 03-REVIEW.md)
 
 Progress: [████████████████████] 12/12 plans (100%) — Phases 1-3 of 5 complete
 
@@ -81,6 +81,12 @@ None yet.
 - [Phase 1] Accepted risks to revisit later (see `01-SECURITY.md`): error responses have no secrets today but revisit at Phase 5 container publish (T-01-06); SSE endpoint has no auth surface, revisit if Phase 5 exposes beyond localhost (T-01-07); frontend holds no secrets, revisit at Phase 4 chat panel (T-01-09) — Phase 3's `ChatPlaceholder` is inert with no state, so this stays correctly deferred to Phase 4.
 - [Phase 2] Accepted risks to revisit later (see `02-SECURITY.md`): trade rejection detail carries user's own cash/share data only, revisit at Phase 5 container publish (T-02-06); no rate limit on trade submissions, revisit if Phase 5 exposes beyond localhost (T-02-10). Per-tick position recompute cost (T-02-13) was implicitly revisited by Phase 3's heatmap/sparklines — no performance issue surfaced.
 - [Phase 3] Accepted risks to revisit later (see `03-SECURITY.md`): watchlist add/remove leaves no audit trail beyond `added_at` (T-03-05); portfolio history endpoint discloses only the local user's own data (T-03-10) — both revisit at Phase 5 container publish; resize-observer cost on chart panels (T-03-17) is bounded to a local single-user session, no revisit planned.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260817-lcw | Fix page.tsx watchlist remove handler to clear selectedTicker when the removed ticker is the currently-selected one (WR-03 from 03-REVIEW.md) | 2026-08-17 | 11b4d72 | [260817-lcw-fix-page-tsx-watchlist-remove-handler-to](./quick/260817-lcw-fix-page-tsx-watchlist-remove-handler-to/) |
 
 ## Deferred Items
 
