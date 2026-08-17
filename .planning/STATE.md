@@ -2,43 +2,43 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 03
-current_phase_name: Visual Terminal & Watchlist Control
-status: executing
+current_phase: 4
+current_phase_name: AI Copilot
+status: planning
 stopped_at: Phase 3 context gathered
-last_updated: "2026-08-17T04:20:45.028Z"
+last_updated: "2026-08-17T16:35:28.774Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 12
-  completed_plans: 7
+  completed_plans: 12
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-16)
+See: .planning/PROJECT.md (updated 2026-08-17)
 
 **Core value:** A user can watch live prices stream, trade a simulated portfolio, and have an AI assistant execute trades and manage the watchlist through natural language — all in one fluid, visually polished terminal-style interface.
-**Current focus:** Phase 03 — Visual Terminal & Watchlist Control
+**Current focus:** Phase 4 — AI Copilot
 
 ## Current Position
 
-Phase: 03 (Visual Terminal & Watchlist Control) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 03
-Last activity: 2026-08-17 — Phase 03 execution started
+Phase: 4 — AI Copilot
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-17 — Phase 03 complete, transitioned to Phase 4
 
-Progress: [████████████████████] 7/7 plans (100%) — Phases 1-2 of 5 complete
+Progress: [████████████████████] 12/12 plans (100%) — Phases 1-3 of 5 complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 7
+- Total plans completed: 12
 - Average duration: —
 - Total execution time: —
 
@@ -48,6 +48,7 @@ Progress: [████████████████████] 7/7 pla
 |-------|-------|-------|----------|
 | 01 | 4 | - | - |
 | 02 | 3 | - | - |
+| 03 | 5 | - | - |
 
 **Recent Trend:**
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - Roadmap: Phase 1 wires the existing `backend/app/market/*` package into a running app rather than rebuilding it — app entrypoint, SQLite lazy init, and Next.js shell all land together so later phases have a working host
 - Project: Simulator-only market data — no `MASSIVE_API_KEY` for this build
 - Project: Real `OPENROUTER_API_KEY` used from the start; `LLM_MOCK` exists for E2E determinism only
+- Phase 3: Watchlist and positions are fully decoupled tables with no FK relationship; trade execution has zero reference to the watchlist
+- Phase 3: Portfolio snapshot write lives inside `execute_trade()` itself (not the route handler) so every future caller, including Phase 4's chat-initiated trades, is guaranteed to produce a snapshot
 
 ### Pending Todos
 
@@ -75,9 +78,9 @@ None yet.
 ### Blockers/Concerns
 
 - REQUIREMENTS.md originally stated "38 total" v1 requirements; the actual enumerated count is 40 (MARKET 4, PORT 10, WATCH 5, CHAT 9, UI 4, INFRA 4, TEST 4). Coverage section corrected to 40 during roadmap creation.
-- [Phase 1] Accepted risks to revisit later (see `01-SECURITY.md`): error responses have no secrets today but revisit at Phase 5 container publish (T-01-06); SSE endpoint has no auth surface, revisit if Phase 5 exposes beyond localhost (T-01-07); frontend holds no secrets, revisit at Phase 4 chat panel (T-01-09).
-- [Phase 2] Accepted risks to revisit later (see `02-SECURITY.md`): trade rejection detail carries user's own cash/share data only, revisit at Phase 5 container publish (T-02-06); no rate limit on trade submissions, revisit if Phase 5 exposes beyond localhost (T-02-10); per-tick position recompute cost, revisit at Phase 3 heatmap/sparklines (T-02-13).
-- PORT-08 (heatmap) and PORT-09 (P&L chart + `portfolio_snapshots` writer) are explicitly Phase 3 scope, not Phase 2 — deferred by design, not a gap.
+- [Phase 1] Accepted risks to revisit later (see `01-SECURITY.md`): error responses have no secrets today but revisit at Phase 5 container publish (T-01-06); SSE endpoint has no auth surface, revisit if Phase 5 exposes beyond localhost (T-01-07); frontend holds no secrets, revisit at Phase 4 chat panel (T-01-09) — Phase 3's `ChatPlaceholder` is inert with no state, so this stays correctly deferred to Phase 4.
+- [Phase 2] Accepted risks to revisit later (see `02-SECURITY.md`): trade rejection detail carries user's own cash/share data only, revisit at Phase 5 container publish (T-02-06); no rate limit on trade submissions, revisit if Phase 5 exposes beyond localhost (T-02-10). Per-tick position recompute cost (T-02-13) was implicitly revisited by Phase 3's heatmap/sparklines — no performance issue surfaced.
+- [Phase 3] Accepted risks to revisit later (see `03-SECURITY.md`): watchlist add/remove leaves no audit trail beyond `added_at` (T-03-05); portfolio history endpoint discloses only the local user's own data (T-03-10) — both revisit at Phase 5 container publish; resize-observer cost on chart panels (T-03-17) is bounded to a local single-user session, no revisit planned.
 
 ## Deferred Items
 
@@ -89,19 +92,21 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-17T03:12:17.954Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-visual-terminal-watchlist-control/03-CONTEXT.md
+Last session: 2026-08-17T16:35:00Z
+Stopped at: Phase 3 complete, ready to plan Phase 4
+Resume file: None
 
-### Phase 2 close-out summary
+### Phase 3 close-out summary
 
-- 3 plans (02-01..02-03) executed across 2 waves, merged via worktree isolation. Code review found 3 warnings (concurrency error masking, missing self-validation in `execute_trade`, shared test-fixture leak), all fixed.
-- UAT: 4/4 tests passed (`02-UAT.md`) — backend-disconnect resilience, trade-bar error states, positions table live behavior, judgment-tier prohibitions sign-off.
-- Security: `02-SECURITY.md` created, 13 threats registered across the phase's 3 plan-time threat models, all closed (9 mitigated + verified in code, 4 accepted risks documented), `threats_open: 0`.
-- Live end-to-end HTTP smoke test performed during verification: fresh portfolio → buy → oversell rejection → untradable-ticker rejection → sell, all confirmed against a real temporary SQLite DB.
-- 199 total tests passing (139 backend + 60 frontend), no regressions from Phase 1.
-- Environment note: `uv run` must be invoked from `backend/` (not repo root) or it silently resolves to Anaconda's Python and fails with `ModuleNotFoundError`. Same for `next build` — use `npx next build --webpack` (Turbopack fails on this machine, documented in Phase 1 notes).
+- 5 plans (03-01..03-05) executed across 5 waves (each wave single-plan, strictly sequential — 01→02→03→04→05 dependency chain), merged via worktree isolation. Two executor hiccups along the way, both environment/infrastructure (a host-sleep interruption mid-summary on 03-03, resumed cleanly; a stalled dispatch on 03-04 before any worktree was created, redispatched cleanly) — no work lost either time.
+- Code review found 0 critical, 3 warnings (watchlist cap check not transactional, `_apply_sell`'s exact float `== 0` comparison will misbehave once Phase 4 fractional-quantity trades land, `selectedTicker` not cleared when its watchlist entry is removed), 4 info — none blocking, documented in `03-REVIEW.md`.
+- UAT: 10/10 tests passed (`03-UAT.md`) — 9 verified via automated Playwright browser testing against a live server on a fresh temp DB, 1 (chat-placeholder visual chrome parity) confirmed directly by the user in a real browser.
+- Security: `03-SECURITY.md` created, 27 threats registered across the phase's 5 plan-time threat models, all closed (24 mitigated + verified via grep/file checks against the actual implementation, 3 accepted risks documented), `threats_open: 0`.
+- Live automated UI verification: added/removed/re-added a ticker (sparkline reset confirmed), bought 3 positions (heatmap proportional sizing + red/green both confirmed live), clicked between watchlist rows (main chart switching + remove-control isolation confirmed), resized 1600px→800px→1600px (single-column collapse + redraw confirmed), cleared the entire watchlist (empty state confirmed, no layout shift in sibling panels).
+- Backend suite grew from 157 to 172 tests; frontend grew from 60 to 95 tests. All green post-merge, every wave.
+- Known non-blocking bug carried into Phase 4 planning: `page.tsx`'s watchlist remove handler doesn't clear `selectedTicker`, so removing the currently-selected ticker leaves a stale price in the main chart header (WR-03 in `03-REVIEW.md`).
+- Environment note (same as Phase 1/2): `uv run` must be invoked from `backend/`, not repo root. `npx next build --webpack` (not Turbopack) for production builds. New this phase: a fresh git worktree has no `frontend/node_modules` (gitignored) — `npm install` is needed before any frontend test/lint/build runs in an isolated worktree.
 
 ### To resume
 
-Phase 3 (Visual Terminal & Watchlist Control) has not been planned yet. Run `/gsd-discuss-phase 3` to gather context, or `/gsd-plan-phase 3` to plan directly.
+Phase 4 (AI Copilot) has not been planned yet. Run `/gsd-discuss-phase 4` to gather context, or `/gsd-plan-phase 4` to plan directly.
