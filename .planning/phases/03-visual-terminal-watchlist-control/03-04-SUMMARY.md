@@ -192,6 +192,10 @@ None — no hardcoded empty values or placeholder text were introduced. The heat
 
 None — all new surfaces (`HeatmapCell`/`Heatmap`'s rendering of server-supplied position values and ticker text, `MainChart`'s rendering of ticker/price text and accumulated history) were already registered and dispositioned in this plan's own `<threat_model>` (T-03-11 through T-03-14, T-03-SC), with no additional surface introduced beyond what was planned.
 
+## Self-Check: PASSED
+
+All created files verified present on disk; all task commits (`273df69`, `c82be22`) and this summary's commit (`b3f132a`) verified present in `git log`.
+
 ---
 *Phase: 03-visual-terminal-watchlist-control*
 *Completed: 2026-08-17*
