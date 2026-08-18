@@ -36,16 +36,16 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 - ✓ P&L chart (Recharts line chart of `portfolio_snapshots`, loading/empty/single-point/populated states) — Phase 3 (PORT-09)
 - ✓ Full eight-panel terminal layout: two-column desktop grid, single-column tablet stack, reserved AI chat panel slot for Phase 4 — Phase 3 (UI-02, UI-04)
 - ✓ Frontend unit tests: price flash animation, watchlist CRUD, portfolio display calculations — Phase 3 (TEST-03, in the project's established pure-function-and-hook testing convention — no test yet exercises the live fetch-based add/remove call path end-to-end; flagged non-blocking in `03-VERIFICATION.md`)
+- ✓ LLM chat integration: `POST /api/chat` via LiteLLM → OpenRouter (Cerebras, `gpt-oss-120b`), structured output schema, auto-executed trades/watchlist changes with exact-numbers refusals on failure — Phase 4 (CHAT-01, CHAT-03, CHAT-04, CHAT-05, CHAT-08)
+- ✓ `LLM_MOCK` deterministic mode for testing — Phase 4 (CHAT-09)
+- ✓ AI chat panel (frontend): live transcript, typing-dots indicator, history persistence, inline action cards, terminal-wide refresh after chat-driven changes — Phase 4 (CHAT-02, CHAT-06, CHAT-07)
+- ✓ Backend unit tests: LLM structured-output parsing, including malformed/null responses — Phase 4 (TEST-02)
 
 ### Active
 
-- [ ] LLM chat integration: `POST /api/chat` via LiteLLM → OpenRouter (Cerebras, `gpt-oss-120b`), structured output schema, auto-executed trades/watchlist changes
-- [ ] `LLM_MOCK` deterministic mode for testing
-- [ ] AI chat panel (frontend) — `ChatPlaceholder` shipped in Phase 3 as an inert, correctly-sized slot; Phase 4 fills it with live content
 - [ ] Multi-stage Dockerfile (Node build → Python runtime) serving static frontend + API on port 8000
 - [ ] `docker-compose.yml` convenience wrapper
 - [ ] Start/stop scripts (mac + windows)
-- [ ] Backend unit tests: LLM structured-output parsing
 - [ ] Playwright E2E suite in `test/` with `docker-compose.test.yml`, `LLM_MOCK=true` scenarios
 
 ### Out of Scope
@@ -113,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-17 after Phase 3*
+*Last updated: 2026-08-18 after Phase 4*
