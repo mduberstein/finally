@@ -43,7 +43,7 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 - [ ] **CHAT-04**: The LLM assistant can add/remove watchlist tickers through natural language
 - [ ] **CHAT-05**: Failed LLM-initiated trades (e.g. insufficient cash) surface as an error the assistant explains back to the user
 - [x] **CHAT-06**: Chat conversation history persists across page reloads (`chat_messages` table)
-- [ ] **CHAT-07**: A loading indicator shows while waiting for the LLM response
+- [x] **CHAT-07**: A loading indicator shows while waiting for the LLM response
 - [x] **CHAT-08**: LLM calls use LiteLLM → OpenRouter → Cerebras (`gpt-oss-120b`) with structured outputs, per the `cerebras-inference` skill
 - [x] **CHAT-09**: Setting `LLM_MOCK=true` returns deterministic mock responses for testing
 
@@ -115,7 +115,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAT-04 | Phase 4 | Pending |
 | CHAT-05 | Phase 4 | Pending |
 | CHAT-06 | Phase 4 | Complete |
-| CHAT-07 | Phase 4 | Pending |
+| CHAT-07 | Phase 4 | Complete |
 | CHAT-08 | Phase 4 | Complete |
 | CHAT-09 | Phase 4 | Complete |
 | UI-01 | Phase 1 | Complete |
