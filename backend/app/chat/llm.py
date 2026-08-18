@@ -24,7 +24,7 @@ _MOCK_REPLY = "Mock response: portfolio and watchlist unchanged."
 _PARSE_EXCERPT_LENGTH = 300
 
 _TRADE_PATTERN = re.compile(
-    r"\b(buy|sell)\b\s+(\d+)\s+(?:shares?\s+of\s+)?([a-zA-Z]{1,10})\b",
+    r"\b(buy|sell)\b\s+(\d+)\s+(?:shares?\s+of\s+)?(?!shares?\b)([a-zA-Z]{1,10})\b",
     re.IGNORECASE,
 )
 _WATCHLIST_ADD_PATTERN = re.compile(
