@@ -139,7 +139,7 @@ def execute_actions(response: ChatResponse, cache: PriceCache) -> tuple[list[dic
 
         if action == "add":
             try:
-                normalized = add_ticker(change.ticker)
+                normalized = add_ticker(ticker)
             except WatchlistRejected as error:
                 actions.append(
                     {
@@ -163,7 +163,7 @@ def execute_actions(response: ChatResponse, cache: PriceCache) -> tuple[list[dic
             continue
 
         try:
-            removed = remove_ticker(change.ticker)
+            removed = remove_ticker(ticker)
         except WatchlistRejected as error:
             actions.append(
                 {
