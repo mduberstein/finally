@@ -215,9 +215,32 @@
   }
 }
 
+/* Typing-dots loading signal (D-03) — three dots pulsing opacity in
+   sequence while a POST /api/chat request is in flight. */
+@keyframes typing-dot {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .animate-typing-dot {
+    animation: typing-dot 1.2s ease-in-out infinite;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-flash-up,
   .animate-flash-down {
     animation: none;
+  }
+
+  .animate-typing-dot {
+    animation: none;
+    opacity: 0.6;
   }
 }

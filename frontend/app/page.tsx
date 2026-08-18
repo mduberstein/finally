@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChatPlaceholder } from "@/components/ChatPlaceholder";
+import { ChatPanel } from "@/components/ChatPanel";
 import { Header } from "@/components/Header";
 import { Heatmap } from "@/components/Heatmap";
 import { MainChart } from "@/components/MainChart";
@@ -155,7 +155,7 @@ export default function Home() {
               <PnlChart points={portfolioHistory} />
             </div>
             <PositionsTable rows={positionRows} />
-            <ChatPlaceholder />
+            <ChatPanel />
           </div>
         </div>
       </main>
