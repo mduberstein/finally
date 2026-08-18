@@ -4,15 +4,24 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app import db
+from app.chat import create_chat_router
 from app.market import MarketFeed, PriceCache, create_source
 from app.market.simulator import SimulatorSource
 from app.market.stream import create_stream_router
 from app.portfolio import SnapshotWriter, create_portfolio_router
 from app.watchlist import create_watchlist_router
+
+# Resolved against the repo root (not the process cwd) so a bare
+# `uv run uvicorn` started from `backend/` still finds the repo-root `.env`.
+# Default no-override behaviour means a value already in the process
+# environment (Docker `--env-file`, a shell export, a pytest
+# `monkeypatch.setenv`) always wins over the file.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 # Module-level cache: the stream router factory binds to a cache at import
 # time, so it must exist before the app object (and its lifespan) is built.
@@ -50,6 +59,7 @@ async def health() -> dict:
 app.include_router(create_stream_router(cache))
 app.include_router(create_portfolio_router(cache))
 app.include_router(create_watchlist_router(cache))
+app.include_router(create_chat_router(cache))
 
 # Resolved against the repo root (not the process cwd) so `backend/static`
 # means the same directory whether uvicorn is started from the repo root or
