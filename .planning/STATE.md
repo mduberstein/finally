@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 current_phase_name: ai-copilot
-status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-08-18T02:08:07.886Z"
+status: verifying
+stopped_at: Completed 04-04-PLAN.md — Phase 4 (ai-copilot) complete
+last_updated: "2026-08-18T14:38:35.870Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 16
-  completed_plans: 13
+  completed_plans: 16
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-17)
 ## Current Position
 
 Phase: 04 (ai-copilot) — EXECUTING
-Plan: 2 of 4
-Status: Ready to execute
+Plan: 4 of 4
+Status: Phase complete — ready for verification
 Last activity: 2026-08-17 — Phase 04 execution started
 
-Progress: [████████████████████] 12/12 plans ([████████░░] 81%) — Phases 1-3 of 5 complete
+Progress: [████████████████████] 12/12 plans ([██████████] 100%) — Phases 1-3 of 5 complete
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [████████████████████] 12/12 p
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 04 P01 | ~25 min | 3 tasks | 13 files |
+| Phase 04 P04 | 12min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Recent decisions affecting current work:
 - Phase 3: Watchlist and positions are fully decoupled tables with no FK relationship; trade execution has zero reference to the watchlist
 - Phase 3: Portfolio snapshot write lives inside `execute_trade()` itself (not the route handler) so every future caller, including Phase 4's chat-initiated trades, is guaranteed to produce a snapshot
 - [Phase ?]: Task 3 TDD flow confirmed Task 2's implementation had no defects: all 8 pinning tests passed on first run, no service.py changes needed
+- [Phase ?]: Phase 4: onActed fires only when actionCardText is non-null for at least one action — one function decides both card rendering and refresh-trigger honesty
+- [Phase ?]: Phase 4: clearSelectionIfAbsent added as a sibling to clearSelectionIfRemoved rather than a generalization, keeping the click-to-remove path and its tests untouched
 
 ### Pending Todos
 
@@ -105,8 +108,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-18T02:08:07.875Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-08-18T14:38:35.860Z
+Stopped at: Completed 04-04-PLAN.md — Phase 4 (ai-copilot) complete
 Resume file: None
 
 ### Phase 3 close-out summary

@@ -133,7 +133,7 @@ Plans:
   4. A trade the assistant cannot fill (insufficient cash, overselling) comes back as a plain-language explanation in the chat, with the portfolio left unchanged
   5. Reloading the page restores the full conversation history, and running with `LLM_MOCK=true` returns deterministic replies with no external API call
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans executed
 
 Plans:
 **Wave 1**
@@ -147,7 +147,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 04-04-PLAN.md — Action cards in the transcript and a terminal that refreshes after a chat-driven change
+- [x] 04-04-PLAN.md — Action cards in the transcript and a terminal that refreshes after a chat-driven change
 
 **UI hint**: yes
 
@@ -176,7 +176,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Live Streaming Terminal | 4/4 | Complete    | 2026-08-15 |
 | 2. Trading & Portfolio | 3/3 | Complete    | 2026-08-16 |
 | 3. Visual Terminal & Watchlist Control | 5/5 | Complete    | 2026-08-17 |
-| 4. AI Copilot | 3/4 | In Progress|  |
+| 4. AI Copilot | 4/4 | In Progress|  |
 | 5. One-Command Launch | 0/TBD | Not started | - |
 
 ## Requirement Coverage

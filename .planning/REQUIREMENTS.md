@@ -39,9 +39,9 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 
 - [x] **CHAT-01**: User can send a chat message and receive a complete structured JSON response (message + executed actions) from the LLM
 - [ ] **CHAT-02**: The LLM assistant can analyze portfolio composition, risk concentration, and P&L when asked
-- [ ] **CHAT-03**: The LLM assistant can auto-execute trades it recommends and the user agrees to, without a confirmation dialog
-- [ ] **CHAT-04**: The LLM assistant can add/remove watchlist tickers through natural language
-- [ ] **CHAT-05**: Failed LLM-initiated trades (e.g. insufficient cash) surface as an error the assistant explains back to the user
+- [x] **CHAT-03**: The LLM assistant can auto-execute trades it recommends and the user agrees to, without a confirmation dialog
+- [x] **CHAT-04**: The LLM assistant can add/remove watchlist tickers through natural language
+- [x] **CHAT-05**: Failed LLM-initiated trades (e.g. insufficient cash) surface as an error the assistant explains back to the user
 - [x] **CHAT-06**: Chat conversation history persists across page reloads (`chat_messages` table)
 - [x] **CHAT-07**: A loading indicator shows while waiting for the LLM response
 - [x] **CHAT-08**: LLM calls use LiteLLM → OpenRouter → Cerebras (`gpt-oss-120b`) with structured outputs, per the `cerebras-inference` skill
@@ -111,9 +111,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WATCH-05 | Phase 3 | Complete |
 | CHAT-01 | Phase 4 | Complete |
 | CHAT-02 | Phase 4 | Pending |
-| CHAT-03 | Phase 4 | Pending |
-| CHAT-04 | Phase 4 | Pending |
-| CHAT-05 | Phase 4 | Pending |
+| CHAT-03 | Phase 4 | Complete |
+| CHAT-04 | Phase 4 | Complete |
+| CHAT-05 | Phase 4 | Complete |
 | CHAT-06 | Phase 4 | Complete |
 | CHAT-07 | Phase 4 | Complete |
 | CHAT-08 | Phase 4 | Complete |
