@@ -18,3 +18,21 @@ export function clearSelectionIfRemoved(current: string | null, removed: string)
   if (current === removed) return null;
   return current;
 }
+
+/**
+ * Sibling to `clearSelectionIfRemoved` for the refetch case (Plan 04): a
+ * chat-driven watchlist change can drop the currently-charted ticker
+ * without the frontend ever learning its identity directly, only that the
+ * refreshed ticker list no longer contains it. Return `null` when
+ * `current` is non-null and absent from `tickers`, otherwise return
+ * `current` unchanged (same reference, so React can bail out of a
+ * redundant re-render) — the same reference-stability contract as the
+ * existing helper.
+ */
+export function clearSelectionIfAbsent(
+  current: string | null,
+  tickers: readonly string[],
+): string | null {
+  if (current !== null && !tickers.includes(current)) return null;
+  return current;
+}

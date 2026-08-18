@@ -11,7 +11,7 @@ import { TradeBar } from "@/components/TradeBar";
 import { Watchlist } from "@/components/Watchlist";
 import { deriveHeatmapItems } from "@/lib/heatmap";
 import { derivePortfolioValue, derivePositionRows } from "@/lib/portfolio";
-import { clearSelectionIfRemoved } from "@/lib/selection";
+import { clearSelectionIfAbsent, clearSelectionIfRemoved } from "@/lib/selection";
 import { usePriceHistory } from "@/lib/usePriceHistory";
 import { usePriceStream } from "@/lib/usePriceStream";
 import type { PortfolioSnapshot, PortfolioSnapshotPoint, WatchlistEntry } from "@/lib/types";
@@ -57,18 +57,40 @@ export default function Home() {
     fetchPortfolioHistory();
   }
 
-  useEffect(() => {
+  const fetchWatchlist = useCallback(() => {
     fetch("/api/watchlist")
       .then((response) => {
         if (!response.ok) throw new Error(`watchlist fetch failed: ${response.status}`);
         return response.json();
       })
-      .then((entries: WatchlistEntry[]) => setWatchlist(entries))
+      .then((entries: WatchlistEntry[]) => {
+        setWatchlist(entries);
+        // A chat-driven removal can drop the charted ticker without this
+        // component ever calling handleRemove directly — reconcile the
+        // selection against the refreshed ticker list the same way the
+        // click-to-remove path does (T-04-25).
+        setSelectedTicker((current) =>
+          clearSelectionIfAbsent(
+            current,
+            entries.map((entry) => entry.ticker),
+          ),
+        );
+      })
       .catch((error: unknown) => {
         console.error(error);
         setWatchlist([]);
       });
   }, []);
+
+  function handleChatActed() {
+    fetchPortfolio();
+    fetchPortfolioHistory();
+    fetchWatchlist();
+  }
+
+  useEffect(() => {
+    fetchWatchlist();
+  }, [fetchWatchlist]);
 
   useEffect(() => {
     fetchPortfolio();
@@ -155,7 +177,7 @@ export default function Home() {
               <PnlChart points={portfolioHistory} />
             </div>
             <PositionsTable rows={positionRows} />
-            <ChatPanel />
+            <ChatPanel onActed={handleChatActed} />
           </div>
         </div>
       </main>

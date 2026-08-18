@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChatActionCard } from "@/components/ChatActionCard";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatTypingIndicator } from "@/components/ChatTypingIndicator";
 import {
+  actionCardText,
   appendAssistantReply,
   appendUserMessage,
   canSendChatMessage,
@@ -19,6 +21,13 @@ import {
   type ChatReply,
 } from "@/lib/chat";
 
+interface ChatPanelProps {
+  /** Fires after a turn that executed at least one trade or watchlist
+   * change — never for a pure-analysis or all-failed turn — so the rest of
+   * the terminal can refetch portfolio and watchlist state (T-04-26). */
+  onActed?: () => void;
+}
+
 /**
  * The AI Copilot panel: fetches persisted history on mount, renders a
  * scrolling bubble transcript with a pinned input row, shows typing dots
@@ -27,7 +36,7 @@ import {
  * heading, `h-64 min-h-64` box — matches every sibling panel exactly, per
  * Phase 3 D-03 and this plan's assumption 1.
  */
-export function ChatPanel() {
+export function ChatPanel({ onActed }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessageRecord[] | null>(null);
   const [draft, setDraft] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -86,6 +95,9 @@ export function ChatPanel() {
       const reply = (await response.json()) as ChatReply;
       const repliedAt = new Date().toISOString();
       setMessages((current) => appendAssistantReply(current ?? [], reply, repliedAt));
+
+      const acted = reply.actions.some((action) => actionCardText(action) !== null);
+      if (acted) onActed?.();
     } catch {
       setMessages((current) => dropLastMessage(current ?? []));
       setDraft(text);
@@ -109,9 +121,26 @@ export function ChatPanel() {
             </div>
           ) : (
             <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
-              {messages.map((message, index) => (
-                <ChatMessage key={index} role={message.role} content={message.content} />
-              ))}
+              {messages.map((message, index) => {
+                // actionCardText is the one place that decides what
+                // "happened" means (T-04-22); a message with only failed
+                // or unrecognized actions renders no children at all, so
+                // the bubble looks exactly like a pure-analysis turn.
+                const cards = (message.actions ?? []).filter(
+                  (action) => actionCardText(action) !== null,
+                );
+                return (
+                  <ChatMessage key={index} role={message.role} content={message.content}>
+                    {cards.length > 0
+                      ? cards.map((action, actionIndex) => (
+                          <div key={actionIndex} className={actionIndex > 0 ? "mt-1" : undefined}>
+                            <ChatActionCard action={action} />
+                          </div>
+                        ))
+                      : undefined}
+                  </ChatMessage>
+                );
+              })}
               {submitting && <ChatTypingIndicator />}
               <div ref={scrollAnchorRef} />
             </div>
