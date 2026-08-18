@@ -390,17 +390,19 @@ Not applicable — this is a greenfield phase (new package, new endpoints), not 
 
 **If this table is empty:** N/A — see rows above.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **No `GET` chat-history endpoint declared in PLAN.md §8, but CHAT-06/D-10 require one**
    - What we know: PLAN.md's Chat endpoints table lists only `POST /api/chat`. CONTEXT.md D-10 explicitly requires fetching full persisted history on page load, capped at ~100 messages.
    - What's unclear: The exact path/name the planner should use, since it's not in the canonical spec.
    - Recommendation: Add `GET /api/chat/history` (mirrors `GET /api/portfolio/history`'s existing naming convention) returning `list[dict]` in chronological order, capped per D-10. This is a small, low-risk addition to PLAN.md's contract that the planner should make explicit in the phase plan.
+   - **RESOLVED:** 04-01-PLAN.md Task 2 adds `GET /api/chat/history`, backed by `get_recent_messages()` (DESC query + Python `reversed()`, mirroring `get_portfolio_history`), capped at 100 messages per D-10.
 
 2. **Whether `TradeAction.side`/`WatchlistAction.action` should be `Literal[...]` or plain `str` in the structured-output schema**
    - What we know: Cerebras strict mode supports enums (up to 500 values, per official docs), so `Literal["buy", "sell"]` should produce a valid, LiteLLM-generated enum constraint.
    - What's unclear: Whether constraining via `Literal` in the schema measurably improves the model's reliability at emitting exactly `"buy"`/`"sell"` versus validating the returned string in Python after the fact (matching `execute_trade()`'s own `if side not in ("buy", "sell")` check, which already exists and fires regardless).
    - Recommendation: Use `Literal["buy", "sell"]` in the schema for defense-in-depth (letting strict mode do some of the work), but keep `execute_trade()`'s own validation as the actual enforcement boundary — this costs nothing extra since that check already exists.
+   - **RESOLVED:** 04-01-PLAN.md uses `TradeAction.side: Literal["buy", "sell"]` and `WatchlistAction.action: Literal["add", "remove"]` in the structured-output schema, per the recommendation.
 
 ## Environment Availability
 
