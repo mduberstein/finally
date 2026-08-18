@@ -11,9 +11,14 @@ from datetime import UTC, datetime
 
 from app.db.database import DEFAULT_USER_ID, connect
 from app.market.cache import PriceCache
+from app.portfolio.models import TradeRejected
+from app.portfolio.service import execute_trade
+from app.watchlist.models import WatchlistRejected
+from app.watchlist.service import add_ticker, remove_ticker
 
 from .llm import call_llm, parse_response
-from .prompt import build_messages
+from .models import ChatResponse
+from .prompt import build_messages, build_portfolio_context
 
 HISTORY_LIMIT = 100
 """D-10's cap, resolved to exactly 100 by `04-UI-SPEC.md` Discretion
@@ -46,20 +51,187 @@ def get_recent_messages(limit: int = HISTORY_LIMIT) -> list[dict]:
 
 
 def handle_chat_message(message: str, cache: PriceCache) -> dict:
-    """Run one chat turn: load history, call the model, parse the reply,
-    persist both sides of the turn, and return the response payload.
-
-    `cache` is accepted now even though this plan does not read it, so
-    Plan 03's portfolio-context builder needs no signature change.
+    """Run one chat turn: load history and live portfolio context, call the
+    model, parse the reply, execute any proposed actions, persist both sides
+    of the turn (with the failure explanations appended), and return the
+    response payload.
     """
-    del cache
     history = get_recent_messages()
-    messages = build_messages(history, message)
+    context = build_portfolio_context(cache)
+    messages = build_messages(history, message, context)
     raw = call_llm(messages)
     parsed = parse_response(raw)
+    actions, sentences = execute_actions(parsed, cache)
+
+    combined_message = parsed.message
+    if sentences:
+        combined_message = f"{parsed.message}\n\n" + " ".join(sentences)
+
+    _persist_turn(message, combined_message, actions)
+    return {"message": combined_message, "actions": actions}
+
+
+def execute_actions(response: ChatResponse, cache: PriceCache) -> tuple[list[dict], list[str]]:
+    """Run every proposed trade then every proposed watchlist change, one at
+    a time, each in its own `try`/`except`. Never batch, never hold a state
+    snapshot across actions: `execute_trade` re-reads cash and position
+    state on every call inside its own `BEGIN IMMEDIATE` transaction, which
+    is what makes two trades in one turn compose correctly.
+
+    Returns the action-payload list (the persisted `chat_messages.actions`
+    contract documented in `models.py`) and the list of explanation
+    sentences the failures produced.
+    """
     actions: list[dict] = []
-    _persist_turn(message, parsed.message, actions)
-    return {"message": parsed.message, "actions": actions}
+    sentences: list[str] = []
+
+    for trade in response.trades:
+        ticker = trade.ticker.strip().upper()
+        side = trade.side
+        quantity = trade.quantity
+
+        if quantity <= 0:
+            actions.append(
+                {
+                    "type": "trade",
+                    "status": "failed",
+                    "ticker": ticker,
+                    "side": side,
+                    "quantity": quantity,
+                    "code": "invalid_trade",
+                }
+            )
+            sentences.append(
+                f"Couldn't process the {side} for {ticker}: quantity must be a positive "
+                "whole number."
+            )
+            continue
+
+        try:
+            result = execute_trade(ticker, side, quantity, cache)
+        except TradeRejected as error:
+            actions.append(
+                {
+                    "type": "trade",
+                    "status": "failed",
+                    "ticker": ticker,
+                    "side": side,
+                    "quantity": quantity,
+                    "code": error.code,
+                }
+            )
+            sentences.append(rejection_sentence(error))
+        else:
+            actions.append(
+                {
+                    "type": "trade",
+                    "status": "executed",
+                    "ticker": result.ticker,
+                    "side": result.side,
+                    "quantity": result.quantity,
+                    "price": result.price,
+                }
+            )
+
+    for change in response.watchlist_changes:
+        ticker = change.ticker.strip().upper()
+        action = change.action
+
+        if action == "add":
+            try:
+                normalized = add_ticker(change.ticker)
+            except WatchlistRejected as error:
+                actions.append(
+                    {
+                        "type": "watchlist",
+                        "status": "failed",
+                        "ticker": ticker,
+                        "action": action,
+                        "code": error.code,
+                    }
+                )
+                sentences.append(rejection_sentence(error))
+            else:
+                actions.append(
+                    {
+                        "type": "watchlist",
+                        "status": "executed",
+                        "ticker": normalized,
+                        "action": action,
+                    }
+                )
+            continue
+
+        try:
+            removed = remove_ticker(change.ticker)
+        except WatchlistRejected as error:
+            actions.append(
+                {
+                    "type": "watchlist",
+                    "status": "failed",
+                    "ticker": ticker,
+                    "action": action,
+                    "code": error.code,
+                }
+            )
+            sentences.append(rejection_sentence(error))
+            continue
+
+        if removed:
+            actions.append(
+                {
+                    "type": "watchlist",
+                    "status": "executed",
+                    "ticker": ticker,
+                    "action": action,
+                }
+            )
+        else:
+            # `remove_ticker` is itself idempotent and raises nothing for an
+            # absent ticker. Reporting it as executed would make a card
+            # claim something that did not happen (04-UI-SPEC.md
+            # Discretion resolution 4).
+            actions.append(
+                {
+                    "type": "watchlist",
+                    "status": "failed",
+                    "ticker": ticker,
+                    "action": action,
+                    "code": "not_on_watchlist",
+                }
+            )
+            sentences.append(f"{ticker} was not on the watchlist.")
+
+    return actions, sentences
+
+
+def rejection_sentence(error: TradeRejected | WatchlistRejected) -> str:
+    """Map a rejection to one plain-language sentence carrying the exact
+    numbers from its `detail()` payload (D-06), mirroring server-side what
+    `frontend/lib/trade.ts`'s `tradeErrorMessage` does client-side. Never
+    renders a raw exception string into user-facing text.
+    """
+    detail = error.detail()
+    code = detail.get("code")
+
+    if code == "insufficient_cash":
+        return (
+            f"Couldn't buy {detail['ticker']} — it costs ${detail['cost']:,.2f}, "
+            f"only ${detail['cash_balance']:,.2f} available."
+        )
+    if code == "insufficient_shares":
+        return f"Couldn't sell {detail['ticker']} — only {detail['owned']} shares owned."
+    if code == "untradable_ticker":
+        return f"{detail['ticker']} has no live price and can't be traded."
+    if code == "invalid_trade":
+        return f"Couldn't process that trade: {detail.get('message', 'invalid request')}."
+    if code == "duplicate_ticker":
+        return f"{detail['ticker']} is already on the watchlist."
+    if code == "watchlist_full":
+        return f"Watchlist is full — the limit is {detail['limit']} tickers."
+    if code == "invalid_ticker":
+        return f"{detail['ticker']!r} is not a valid ticker symbol."
+    return "That action couldn't be completed."
 
 
 def _persist_turn(user_message: str, assistant_message: str, actions: list[dict]) -> None:
