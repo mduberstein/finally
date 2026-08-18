@@ -1,6 +1,6 @@
 import pytest
 
-from app.chat.llm import EXTRA_BODY, MODEL, call_llm, parse_response
+from app.chat.llm import EXTRA_BODY, MODEL, call_llm, mock_response, parse_response
 from app.chat.models import PARSE_FALLBACK_MESSAGE, ChatResponse
 
 
@@ -74,3 +74,51 @@ class TestParseResponse:
         parsed = parse_response(raw)
 
         assert parsed.message == PARSE_FALLBACK_MESSAGE
+
+
+class TestMockResponseActions:
+    def test_buy_instruction_produces_a_trade_action(self):
+        response = mock_response([{"role": "user", "content": "buy 3 AAPL"}])
+
+        assert len(response.trades) == 1
+        assert response.trades[0].ticker == "AAPL"
+        assert response.trades[0].side == "buy"
+        assert response.trades[0].quantity == 3
+        assert response.watchlist_changes == []
+
+    def test_sell_instruction_with_shares_of_phrasing_produces_a_trade_action(self):
+        response = mock_response([{"role": "user", "content": "sell 2 shares of TSLA"}])
+
+        assert len(response.trades) == 1
+        assert response.trades[0].ticker == "TSLA"
+        assert response.trades[0].side == "sell"
+        assert response.trades[0].quantity == 2
+
+    def test_watchlist_add_instruction_produces_a_watchlist_action(self):
+        response = mock_response([{"role": "user", "content": "Add PYPL to my watchlist"}])
+
+        assert response.trades == []
+        assert len(response.watchlist_changes) == 1
+        assert response.watchlist_changes[0].ticker == "PYPL"
+        assert response.watchlist_changes[0].action == "add"
+
+    def test_watchlist_remove_instruction_produces_a_watchlist_action(self):
+        response = mock_response([{"role": "user", "content": "Remove PYPL from my watchlist"}])
+
+        assert len(response.watchlist_changes) == 1
+        assert response.watchlist_changes[0].ticker == "PYPL"
+        assert response.watchlist_changes[0].action == "remove"
+
+    def test_unmatched_message_produces_canned_reply_with_empty_arrays(self):
+        response = mock_response([{"role": "user", "content": "how am I doing"}])
+
+        assert response.trades == []
+        assert response.watchlist_changes == []
+
+    def test_repeated_calls_with_same_input_are_byte_identical(self):
+        messages = [{"role": "user", "content": "buy 5 NVDA"}]
+
+        first = mock_response(messages)
+        second = mock_response(messages)
+
+        assert first.model_dump_json() == second.model_dump_json()
