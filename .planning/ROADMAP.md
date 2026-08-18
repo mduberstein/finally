@@ -133,7 +133,22 @@ Plans:
   4. A trade the assistant cannot fill (insufficient cash, overselling) comes back as a plain-language explanation in the chat, with the portfolio left unchanged
   5. Reloading the page restores the full conversation history, and running with `LLM_MOCK=true` returns deterministic replies with no external API call
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — Backend tracer: one chat message from POST /api/chat through LiteLLM/Cerebras structured outputs into SQLite, plus GET /api/chat/history
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-02-PLAN.md — The live AI Copilot panel: restored history, bubble transcript, typing dots, pinned input
+- [ ] 04-03-PLAN.md — Portfolio-aware prompt and auto-executed trades and watchlist changes with exact-numbers refusals
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 04-04-PLAN.md — Action cards in the transcript and a terminal that refreshes after a chat-driven change
+
 **UI hint**: yes
 
 ### Phase 5: One-Command Launch
@@ -161,7 +176,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Live Streaming Terminal | 4/4 | Complete    | 2026-08-15 |
 | 2. Trading & Portfolio | 3/3 | Complete    | 2026-08-16 |
 | 3. Visual Terminal & Watchlist Control | 5/5 | Complete    | 2026-08-17 |
-| 4. AI Copilot | 0/TBD | Not started | - |
+| 4. AI Copilot | 0/4 | Planned     | - |
 | 5. One-Command Launch | 0/TBD | Not started | - |
 
 ## Requirement Coverage
