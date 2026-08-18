@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  actionCardText,
   appendAssistantReply,
   appendUserMessage,
   canSendChatMessage,
@@ -88,5 +89,140 @@ describe("copy constants", () => {
 
   it("matches the UI-SPEC input placeholder", () => {
     expect(CHAT_INPUT_PLACEHOLDER).toBe("Ask about your portfolio, or tell me to trade...");
+  });
+});
+
+describe("actionCardText", () => {
+  it("renders an executed buy with quantity, ticker, and fill price", () => {
+    const text = actionCardText({
+      type: "trade",
+      status: "executed",
+      ticker: "AAPL",
+      side: "buy",
+      quantity: 10,
+      price: 190.5,
+    });
+    expect(text).toContain("Bought");
+    expect(text).toContain("10");
+    expect(text).toContain("AAPL");
+    expect(text).toContain("190.50");
+  });
+
+  it("renders an executed sell with quantity, ticker, and fill price", () => {
+    const text = actionCardText({
+      type: "trade",
+      status: "executed",
+      ticker: "TSLA",
+      side: "sell",
+      quantity: 3,
+      price: 245.12,
+    });
+    expect(text).toContain("Sold");
+    expect(text).toContain("3");
+    expect(text).toContain("TSLA");
+    expect(text).toContain("245.12");
+  });
+
+  it("renders an executed watchlist add with the ticker and 'watchlist'", () => {
+    const text = actionCardText({
+      type: "watchlist",
+      status: "executed",
+      ticker: "PYPL",
+      action: "add",
+    });
+    expect(text).toContain("Added");
+    expect(text).toContain("PYPL");
+    expect(text).toContain("watchlist");
+  });
+
+  it("renders an executed watchlist remove with the ticker and 'watchlist'", () => {
+    const text = actionCardText({
+      type: "watchlist",
+      status: "executed",
+      ticker: "JPM",
+      action: "remove",
+    });
+    expect(text).toContain("Removed");
+    expect(text).toContain("JPM");
+    expect(text).toContain("watchlist");
+  });
+
+  it("returns null for a failed trade", () => {
+    expect(
+      actionCardText({
+        type: "trade",
+        status: "failed",
+        ticker: "AAPL",
+        side: "buy",
+        quantity: 10,
+        code: "insufficient_cash",
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null for a failed watchlist change", () => {
+    expect(
+      actionCardText({
+        type: "watchlist",
+        status: "failed",
+        ticker: "AAPL",
+        action: "add",
+        code: "already_on_watchlist",
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null for an unrecognized type", () => {
+    expect(
+      actionCardText({ type: "mystery", status: "executed", ticker: "AAPL" }),
+    ).toBeNull();
+  });
+
+  it("returns null when a trade's price is missing", () => {
+    expect(
+      actionCardText({
+        type: "trade",
+        status: "executed",
+        ticker: "AAPL",
+        side: "buy",
+        quantity: 10,
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null when a trade's price is not a number", () => {
+    expect(
+      actionCardText({
+        type: "trade",
+        status: "executed",
+        ticker: "AAPL",
+        side: "buy",
+        quantity: 10,
+        price: "190.50",
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null when a watchlist action field is neither add nor remove", () => {
+    expect(
+      actionCardText({
+        type: "watchlist",
+        status: "executed",
+        ticker: "AAPL",
+        action: "modify",
+      }),
+    ).toBeNull();
+  });
+
+  it("returns null for null", () => {
+    expect(actionCardText(null)).toBeNull();
+  });
+
+  it("returns null for undefined", () => {
+    expect(actionCardText(undefined)).toBeNull();
+  });
+
+  it("returns null for a non-object value", () => {
+    expect(actionCardText("not an action")).toBeNull();
   });
 });

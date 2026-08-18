@@ -7,15 +7,37 @@
  * now)` time-injected convention.
  */
 
-/** A record persisted actions the assistant executed may carry. Kept
- * permissive (all keys optional) so Plan 04 narrows it into a discriminated
- * union once it renders action cards, rather than replacing this shape. */
-export interface ChatAction {
-  type?: string;
-  status?: string;
-  ticker?: string;
-  [key: string]: unknown;
+import { formatPrice } from "./format";
+
+const EXECUTED = "executed";
+
+/** One LLM-proposed trade element of the persisted `actions` payload
+ * (`backend/app/chat/models.py`'s contract). `price` is present only when
+ * `status` is `"executed"`; `code` only when `"failed"`. */
+export interface TradeChatAction {
+  type: "trade";
+  status: "executed" | "failed";
+  ticker: string;
+  side: "buy" | "sell";
+  quantity: number;
+  price?: number;
+  code?: string;
 }
+
+/** One LLM-proposed watchlist change element of the persisted `actions`
+ * payload. `code` is present only when `status` is `"failed"`. */
+export interface WatchlistChatAction {
+  type: "watchlist";
+  status: "executed" | "failed";
+  ticker: string;
+  action: "add" | "remove";
+  code?: string;
+}
+
+/** A record persisted actions the assistant executed may carry — narrowed
+ * from Plan 02's permissive placeholder into a discriminated union over
+ * `type` now that Plan 04 renders action cards from it. */
+export type ChatAction = TradeChatAction | WatchlistChatAction;
 
 /** One transcript entry, mirroring a `GET /api/chat/history` array element. */
 export interface ChatMessageRecord {
@@ -92,4 +114,47 @@ export function dropLastMessage(
 ): ChatMessageRecord[] {
   if (messages.length === 0) return [];
   return messages.slice(0, -1);
+}
+
+/**
+ * The card sentence for one executed action, or null for anything else —
+ * a non-executed status, an unrecognized `type`, or a payload missing a
+ * required field. This single function is the entire honesty guarantee
+ * behind `ChatActionCard` (D-04, T-04-22): the component has no render
+ * path other than this function's non-null return, so a card is never
+ * shown for something that did not happen. Every field is guarded with a
+ * `typeof` check exactly as `tradeErrorMessage` guards a rejection
+ * payload — these payloads ultimately originate from a model rather than
+ * from this codebase, so an unrecognized shape must produce no card
+ * rather than a card reading undefined.
+ */
+export function actionCardText(action: unknown): string | null {
+  if (action === null || typeof action !== "object") return null;
+  const payload = action as Record<string, unknown>;
+  if (payload.status !== EXECUTED) return null;
+
+  switch (payload.type) {
+    case "trade": {
+      const ticker = typeof payload.ticker === "string" ? payload.ticker : null;
+      const side = payload.side === "buy" || payload.side === "sell" ? payload.side : null;
+      const quantity = typeof payload.quantity === "number" ? payload.quantity : null;
+      const price = typeof payload.price === "number" ? payload.price : null;
+      if (ticker === null || side === null || quantity === null || price === null) return null;
+
+      const verb = side === "buy" ? "Bought" : "Sold";
+      return `✓ ${verb} ${quantity} ${ticker} @ $${formatPrice(price)}`;
+    }
+    case "watchlist": {
+      const ticker = typeof payload.ticker === "string" ? payload.ticker : null;
+      const watchlistAction =
+        payload.action === "add" || payload.action === "remove" ? payload.action : null;
+      if (ticker === null || watchlistAction === null) return null;
+
+      const verb = watchlistAction === "add" ? "Added" : "Removed";
+      const tail = watchlistAction === "add" ? "to watchlist" : "from watchlist";
+      return `✓ ${verb} ${ticker} ${tail}`;
+    }
+    default:
+      return null;
+  }
 }
