@@ -105,7 +105,7 @@ def _last_user_content(messages: list[dict]) -> str:
     return ""
 
 
-def parse_response(raw: str) -> ChatResponse:
+def parse_response(raw: str | None) -> ChatResponse:
     """Parse a raw model reply into a `ChatResponse`, defensively.
 
     A pure function taking a string and returning a model, deliberately
@@ -113,8 +113,13 @@ def parse_response(raw: str) -> ChatResponse:
     no LiteLLM involvement. `gpt-oss-120b` has documented cases on other
     inference backends of leaking reasoning text alongside or instead of
     the structured payload; a leaked-reasoning response degrades to the
-    fallback message rather than propagating as a 500.
+    fallback message rather than propagating as a 500. A `None` reply
+    (refusal, content filter, or transient provider hiccup) is handled the
+    same way rather than raising `TypeError` out of `model_validate_json`.
     """
+    if not isinstance(raw, str):
+        logger.warning("chat response was not a string: %r", type(raw).__name__)
+        return ChatResponse(message=PARSE_FALLBACK_MESSAGE)
     try:
         return ChatResponse.model_validate_json(raw)
     except (ValidationError, ValueError):
