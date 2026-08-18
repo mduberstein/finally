@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 4
-current_phase_name: AI Copilot
+current_phase: 04
+current_phase_name: ai-copilot
 status: executing
-stopped_at: Phase 04 UI-SPEC approved
-last_updated: "2026-08-18T00:43:10.730Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-08-18T02:08:07.886Z"
 last_activity: 2026-08-17
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 16
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-17)
 
 **Core value:** A user can watch live prices stream, trade a simulated portfolio, and have an AI assistant execute trades and manage the watchlist through natural language — all in one fluid, visually polished terminal-style interface.
-**Current focus:** Phase 4 — AI Copilot
+**Current focus:** Phase 04 — ai-copilot
 
 ## Current Position
 
-Phase: 4 — AI Copilot
-Plan: Not started
+Phase: 04 (ai-copilot) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-08-17 - Completed quick task 260817-mlm: Fix _apply_sell's exact float == 0 close-position check to use an epsilon threshold (WR-02 from 03-REVIEW.md)
+Last activity: 2026-08-17 — Phase 04 execution started
 
-Progress: [████████████████████] 12/12 plans (100%) — Phases 1-3 of 5 complete
+Progress: [████████████████████] 12/12 plans ([████████░░] 81%) — Phases 1-3 of 5 complete
 
 ## Performance Metrics
 
@@ -56,6 +56,11 @@ Progress: [████████████████████] 12/12 p
 - Trend: —
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 04 P01 | ~25 min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -70,6 +75,7 @@ Recent decisions affecting current work:
 - Project: Real `OPENROUTER_API_KEY` used from the start; `LLM_MOCK` exists for E2E determinism only
 - Phase 3: Watchlist and positions are fully decoupled tables with no FK relationship; trade execution has zero reference to the watchlist
 - Phase 3: Portfolio snapshot write lives inside `execute_trade()` itself (not the route handler) so every future caller, including Phase 4's chat-initiated trades, is guaranteed to produce a snapshot
+- [Phase ?]: Task 3 TDD flow confirmed Task 2's implementation had no defects: all 8 pinning tests passed on first run, no service.py changes needed
 
 ### Pending Todos
 
@@ -99,9 +105,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-18T00:14:44.982Z
-Stopped at: Phase 04 UI-SPEC approved
-Resume file: .planning/phases/04-ai-copilot/04-UI-SPEC.md
+Last session: 2026-08-18T02:08:07.875Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: None
 
 ### Phase 3 close-out summary
 

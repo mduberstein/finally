@@ -37,15 +37,15 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 
 ### AI Chat
 
-- [ ] **CHAT-01**: User can send a chat message and receive a complete structured JSON response (message + executed actions) from the LLM
+- [x] **CHAT-01**: User can send a chat message and receive a complete structured JSON response (message + executed actions) from the LLM
 - [ ] **CHAT-02**: The LLM assistant can analyze portfolio composition, risk concentration, and P&L when asked
 - [ ] **CHAT-03**: The LLM assistant can auto-execute trades it recommends and the user agrees to, without a confirmation dialog
 - [ ] **CHAT-04**: The LLM assistant can add/remove watchlist tickers through natural language
 - [ ] **CHAT-05**: Failed LLM-initiated trades (e.g. insufficient cash) surface as an error the assistant explains back to the user
-- [ ] **CHAT-06**: Chat conversation history persists across page reloads (`chat_messages` table)
+- [x] **CHAT-06**: Chat conversation history persists across page reloads (`chat_messages` table)
 - [ ] **CHAT-07**: A loading indicator shows while waiting for the LLM response
-- [ ] **CHAT-08**: LLM calls use LiteLLM → OpenRouter → Cerebras (`gpt-oss-120b`) with structured outputs, per the `cerebras-inference` skill
-- [ ] **CHAT-09**: Setting `LLM_MOCK=true` returns deterministic mock responses for testing
+- [x] **CHAT-08**: LLM calls use LiteLLM → OpenRouter → Cerebras (`gpt-oss-120b`) with structured outputs, per the `cerebras-inference` skill
+- [x] **CHAT-09**: Setting `LLM_MOCK=true` returns deterministic mock responses for testing
 
 ### Frontend & Visual Design
 
@@ -64,7 +64,7 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 ### Testing
 
 - [x] **TEST-01**: Backend unit tests cover trade execution, P&L math, and edge cases (insufficient cash, overselling)
-- [ ] **TEST-02**: Backend unit tests cover LLM structured-output parsing, including malformed responses
+- [x] **TEST-02**: Backend unit tests cover LLM structured-output parsing, including malformed responses
 - [x] **TEST-03**: Frontend unit tests cover price flash animation, watchlist CRUD, and portfolio display calculations
 - [ ] **TEST-04**: Playwright E2E suite (`test/`, `LLM_MOCK=true`) covers: fresh start, add/remove ticker, buy/sell trade flow, AI chat trade execution, SSE reconnection
 
@@ -109,15 +109,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WATCH-03 | Phase 3 | Complete |
 | WATCH-04 | Phase 3 | Complete |
 | WATCH-05 | Phase 3 | Complete |
-| CHAT-01 | Phase 4 | Pending |
+| CHAT-01 | Phase 4 | Complete |
 | CHAT-02 | Phase 4 | Pending |
 | CHAT-03 | Phase 4 | Pending |
 | CHAT-04 | Phase 4 | Pending |
 | CHAT-05 | Phase 4 | Pending |
-| CHAT-06 | Phase 4 | Pending |
+| CHAT-06 | Phase 4 | Complete |
 | CHAT-07 | Phase 4 | Pending |
-| CHAT-08 | Phase 4 | Pending |
-| CHAT-09 | Phase 4 | Pending |
+| CHAT-08 | Phase 4 | Complete |
+| CHAT-09 | Phase 4 | Complete |
 | UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 2 | Complete |
@@ -127,7 +127,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-03 | Phase 5 | Pending |
 | INFRA-04 | Phase 5 | Pending |
 | TEST-01 | Phase 2 | Complete |
-| TEST-02 | Phase 4 | Pending |
+| TEST-02 | Phase 4 | Complete |
 | TEST-03 | Phase 3 | Complete |
 | TEST-04 | Phase 5 | Pending |
 
