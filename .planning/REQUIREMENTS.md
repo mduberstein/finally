@@ -58,7 +58,7 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 
 - [x] **INFRA-01**: SQLite database lazily initializes schema and seeds default data on first run if the DB file doesn't exist
 - [x] **INFRA-02**: Single multi-stage Dockerfile builds the Next.js static export and the FastAPI backend into one image serving port 8000
-- [ ] **INFRA-03**: `docker-compose.yml` and `scripts/start_mac.sh` / `scripts/stop_mac.sh` (and Windows equivalents) let the user launch/stop the app with one command
+- [x] **INFRA-03**: `docker-compose.yml` and `scripts/start_mac.sh` / `scripts/stop_mac.sh` (and Windows equivalents) let the user launch/stop the app with one command
 - [x] **INFRA-04**: SQLite file persists across container restarts via a volume mount at `db/finally.db`
 
 ### Testing
@@ -124,7 +124,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-04 | Phase 3 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 5 | Complete |
-| INFRA-03 | Phase 5 | Pending |
+| INFRA-03 | Phase 5 | Complete |
 | INFRA-04 | Phase 5 | Complete |
 | TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 4 | Complete |
