@@ -5,15 +5,29 @@ a table, or discards a row. Every CREATE is `IF NOT EXISTS`; every seed
 INSERT is `OR IGNORE`.
 Calling `initialize()` against an existing, fully-seeded database is a no-op;
 calling it against a database missing some tables adds exactly the missing
-ones, leaving existing rows untouched.
+ones, leaving existing rows untouched. `initialize()` also emits one startup
+log record naming the resolved absolute database path and whether a file
+already existed there — an operator's evidence that persistence is (or is
+not) actually wired to the intended bind mount.
 """
 
+import logging
 import os
 import sqlite3
 import uuid
 from contextlib import closing
 from datetime import UTC, datetime
 from pathlib import Path
+
+# Routed through "uvicorn.error" rather than a plain module logger: uvicorn's
+# default dictConfig only attaches handlers to the uvicorn.* loggers, leaving
+# the root logger bare, so a `logging.getLogger(__name__).info(...)` call
+# here would fall through to `logging.lastResort` and never reach `docker
+# logs` (lastResort only emits WARNING and above). Every existing call site
+# in this codebase logs at warning/error/exception, which is why none of
+# them hit this. This line is the entire mitigation for a misconfigured or
+# absent bind mount silently degrading into data loss — it must be visible.
+logger = logging.getLogger("uvicorn.error")
 
 DEFAULT_USER_ID = "default"
 
@@ -70,12 +84,18 @@ def initialize() -> None:
     and the ten default watchlist tickers, both via INSERT OR IGNORE.
     """
     path = db_path()
+    existed = path.exists()
     path.parent.mkdir(parents=True, exist_ok=True)
 
     with closing(connect()) as conn, conn:
         conn.executescript(_SCHEMA_PATH.read_text())
         _seed_user_profile(conn)
         _seed_watchlist(conn)
+
+    if existed:
+        logger.info("Opened existing database at %s", path)
+    else:
+        logger.info("Created and seeded a new database at %s", path)
 
 
 def _seed_user_profile(conn: sqlite3.Connection) -> None:

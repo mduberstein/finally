@@ -1,0 +1,45 @@
+# Version control
+.git
+.gitignore
+
+# Secrets — never bake into an image layer; supplied at `docker run --env-file`
+.env
+.env.*
+!.env.example
+
+# Python
+.venv
+**/__pycache__
+*.egg-info
+.pytest_cache
+.ruff_cache
+.mypy_cache
+
+# Node
+**/node_modules
+
+# Build artifacts — regenerated fresh at image-build time, never copied stale
+frontend/out
+frontend/.next
+frontend/tsconfig.tsbuildinfo
+backend/static
+
+# Test/dev-only content not needed in the runtime image
+backend/tests
+backend/archive
+backend/market_data_demo.py
+test
+
+# Runtime data
+db/finally.db
+
+# Project tooling/docs not needed to build or run the app
+.planning
+planning
+.claude
+.github
+.gsd
+.sprite
+
+# OS cruft
+**/.DS_Store
