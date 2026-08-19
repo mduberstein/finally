@@ -56,7 +56,13 @@ esac
 for i in $(seq 1 30); do
   if curl -sf http://localhost:8000/api/health >/dev/null 2>&1; then
     echo "finally is ready at http://localhost:8000"
-    open http://localhost:8000
+    if command -v open >/dev/null 2>&1; then
+      open http://localhost:8000
+    elif command -v xdg-open >/dev/null 2>&1; then
+      xdg-open http://localhost:8000
+    else
+      echo "Could not find a command to open a browser automatically. Visit http://localhost:8000"
+    fi
     exit 0
   fi
   sleep 1
