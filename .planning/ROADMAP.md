@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Trading & Portfolio** - User buys and sells shares at live prices and watches cash, positions, and total value respond (completed 2026-08-16)
 - [x] **Phase 3: Visual Terminal & Watchlist Control** - Heatmap, P&L chart, sparklines, main chart, and full watchlist curation in the complete terminal layout (completed 2026-08-17)
 - [x] **Phase 4: AI Copilot** - Chat assistant that analyzes the portfolio and executes trades and watchlist changes through natural language (completed 2026-08-18)
-- [ ] **Phase 5: One-Command Launch** - Single Docker image, start/stop scripts, persistent data, and a passing Playwright E2E suite
+- [x] **Phase 5: One-Command Launch** - Single Docker image, start/stop scripts, persistent data, and a passing Playwright E2E suite (completed 2026-08-19)
 
 ## Phase Details
 
@@ -169,16 +169,16 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 05-01-PLAN.md — Container tracer: one multi-stage image serving the whole terminal on port 8000, with the SQLite database on a host bind mount that survives clean and unclean restarts
+- [x] 05-01-PLAN.md — Container tracer: one multi-stage image serving the whole terminal on port 8000, with the SQLite database on a host bind mount that survives clean and unclean restarts
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 05-02-PLAN.md — One-command launch: docker-compose wrapper, idempotent mac start/stop scripts with browser open, best-effort Windows mirror, corrected README and manual reset docs
-- [ ] 05-03-PLAN.md — E2E harness tracer: Playwright in docker-compose against the shipping image with mocked LLM and an isolated scratch database, plus the fresh-start scenario
+- [x] 05-02-PLAN.md — One-command launch: docker-compose wrapper, idempotent mac start/stop scripts with browser open, best-effort Windows mirror, corrected README and manual reset docs
+- [x] 05-03-PLAN.md — E2E harness tracer: Playwright in docker-compose against the shipping image with mocked LLM and an isolated scratch database, plus the fresh-start scenario
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 05-04-PLAN.md — E2E scenario expansion: watchlist add/remove, buy/sell, AI-executed trade, and SSE reconnection
+- [x] 05-04-PLAN.md — E2E scenario expansion: watchlist add/remove, buy/sell, AI-executed trade, and SSE reconnection
 
 **UI hint**: no
 
@@ -193,7 +193,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Trading & Portfolio | 3/3 | Complete    | 2026-08-16 |
 | 3. Visual Terminal & Watchlist Control | 5/5 | Complete    | 2026-08-17 |
 | 4. AI Copilot | 4/4 | Complete    | 2026-08-18 |
-| 5. One-Command Launch | 0/TBD | Not started | - |
+| 5. One-Command Launch | 4/4 | Complete    | 2026-08-19 |
 
 ## Requirement Coverage
 
