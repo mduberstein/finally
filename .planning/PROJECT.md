@@ -40,13 +40,13 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 - ✓ `LLM_MOCK` deterministic mode for testing — Phase 4 (CHAT-09)
 - ✓ AI chat panel (frontend): live transcript, typing-dots indicator, history persistence, inline action cards, terminal-wide refresh after chat-driven changes — Phase 4 (CHAT-02, CHAT-06, CHAT-07)
 - ✓ Backend unit tests: LLM structured-output parsing, including malformed/null responses — Phase 4 (TEST-02)
+- ✓ Multi-stage Dockerfile (Node 22 build → Python 3.12/uv runtime) serving static frontend + API on port 8000, bind-mounted SQLite persistence proven across clean and unclean (SIGKILL) restarts — Phase 5 (INFRA-02, INFRA-04)
+- ✓ `docker-compose.yml` convenience wrapper + idempotent `scripts/start_mac.sh`/`stop_mac.sh` (with a best-effort, unverified Windows PowerShell mirror per D-04) — Phase 5 (INFRA-03)
+- ✓ Playwright E2E suite in `test/` with `docker-compose.test.yml`, `LLM_MOCK=true`: fresh start, watchlist add/remove, buy/sell, AI-executed trade, SSE reconnection — Phase 5 (TEST-04)
 
 ### Active
 
-- [ ] Multi-stage Dockerfile (Node build → Python runtime) serving static frontend + API on port 8000
-- [ ] `docker-compose.yml` convenience wrapper
-- [ ] Start/stop scripts (mac + windows)
-- [ ] Playwright E2E suite in `test/` with `docker-compose.test.yml`, `LLM_MOCK=true` scenarios
+*(none — all v1 requirements shipped)*
 
 ### Out of Scope
 
@@ -94,6 +94,10 @@ A user can watch live prices stream, trade a simulated portfolio, and have an AI
 | `SnapshotWriter` lives in `backend/app/portfolio/`, not `backend/app/market/` (deviating from `03-RESEARCH.md`'s suggested location) | A portfolio-value writer is money logic and must not create a dependency from the price-only `market` package into `portfolio` | ✓ Shipped Phase 3 |
 | Heatmap sizing is a pure numeric function (squarified treemap, Bruls/Huizing/van Wijk heuristic) applied only via flexbox `flexGrow` — no pixel math, no DOM measurement | Keeps the algorithm unit-testable in isolation and removes any layout-escape surface from server-supplied position values | ✓ Shipped Phase 3 |
 | Client-side ticker validation in the watchlist add form is a UX courtesy; `normalize_ticker`'s server-side `^[A-Z]{1,10}$` check is the sole authority | Matches the Phase 1/2 precedent (server-authoritative price) — never trust client validation as the security boundary | ✓ Shipped Phase 3 |
+| Docker bind-mounts the host's `db/` directory rather than an opaque named volume | Same file already used by local `uv run uvicorn` dev — visible in the checkout, trivial to inspect or delete for a fresh demo (D-01) | ✓ Shipped Phase 5 |
+| No `--reset` flag on start/stop scripts; resetting to a clean $10k start is a documented manual step (delete `db/finally.db`) | Keeps the scripts simple and matches "safe to run repeatedly" without a destructive code path — the app's existing lazy-init reseeds automatically (D-02) | ✓ Shipped Phase 5 |
+| Container port published as `127.0.0.1:8000:8000`, not `0.0.0.0:8000:8000`, on every launch path | Loopback-only binding closes prior phases' accepted-risk items that were explicitly flagged "revisit at Phase 5 container publish" | ✓ Shipped Phase 5 |
+| `start_mac.sh` seeds `.env` from `.env.example` when absent, never overwriting an existing file | A clean checkout has no `.env` (gitignored); `--env-file` fails hard on a missing file, so success criterion 1 ("one command, clean checkout") is otherwise unachievable | ✓ Shipped Phase 5 |
 
 ## Evolution
 
@@ -113,4 +117,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-18 after Phase 4*
+*Last updated: 2026-08-19 after Phase 5 — all v1 requirements shipped; milestone v1.0 complete*
