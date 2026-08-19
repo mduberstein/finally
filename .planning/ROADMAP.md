@@ -164,7 +164,23 @@ Plans:
   3. The Playwright E2E suite runs against the container with `LLM_MOCK=true` and passes: fresh start, add/remove ticker, buy and sell, AI-executed trade, and SSE reconnection
   4. Running the start and stop scripts repeatedly is safe — no duplicate containers, no lost volume
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 05-01-PLAN.md — Container tracer: one multi-stage image serving the whole terminal on port 8000, with the SQLite database on a host bind mount that survives clean and unclean restarts
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 05-02-PLAN.md — One-command launch: docker-compose wrapper, idempotent mac start/stop scripts with browser open, best-effort Windows mirror, corrected README and manual reset docs
+- [ ] 05-03-PLAN.md — E2E harness tracer: Playwright in docker-compose against the shipping image with mocked LLM and an isolated scratch database, plus the fresh-start scenario
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 05-04-PLAN.md — E2E scenario expansion: watchlist add/remove, buy/sell, AI-executed trade, and SSE reconnection
+
+**UI hint**: no
 
 ## Progress
 
