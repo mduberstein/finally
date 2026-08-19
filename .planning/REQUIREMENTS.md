@@ -66,7 +66,7 @@ Requirements for the full remaining build. Each maps to roadmap phases. Market d
 - [x] **TEST-01**: Backend unit tests cover trade execution, P&L math, and edge cases (insufficient cash, overselling)
 - [x] **TEST-02**: Backend unit tests cover LLM structured-output parsing, including malformed responses
 - [x] **TEST-03**: Frontend unit tests cover price flash animation, watchlist CRUD, and portfolio display calculations
-- [ ] **TEST-04**: Playwright E2E suite (`test/`, `LLM_MOCK=true`) covers: fresh start, add/remove ticker, buy/sell trade flow, AI chat trade execution, SSE reconnection
+- [x] **TEST-04**: Playwright E2E suite (`test/`, `LLM_MOCK=true`) covers: fresh start, add/remove ticker, buy/sell trade flow, AI chat trade execution, SSE reconnection
 
 ## v2 Requirements
 
@@ -129,7 +129,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 4 | Complete |
 | TEST-03 | Phase 3 | Complete |
-| TEST-04 | Phase 5 | Pending |
+| TEST-04 | Phase 5 | Complete |
 
 **Coverage:**
 
