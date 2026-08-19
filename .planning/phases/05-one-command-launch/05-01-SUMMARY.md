@@ -171,3 +171,13 @@ None - no external service configuration required.
 ---
 *Phase: 05-one-command-launch*
 *Completed: 2026-08-18*
+
+## Self-Check: PASSED
+
+- FOUND: Dockerfile
+- FOUND: .dockerignore
+- FOUND: .env.example
+- FOUND: .planning/phases/05-one-command-launch/05-01-SUMMARY.md
+- FOUND commit: a7226ed
+- FOUND commit: 585c5ee
+- FOUND commit: ab9118d
