@@ -1,0 +1,46 @@
+services:
+  app:
+    build:
+      context: ..
+    environment:
+      # Quoted so YAML parses this as the string "true", not a boolean that
+      # would render as "True" and fail backend/app/chat/llm.py's exact
+      # lowercase comparison, silently re-enabling real OpenRouter calls.
+      - "LLM_MOCK=true"
+    # No reference of any kind to the repository root's environment file:
+    # that file holds the real inference credential and must never enter
+    # this container.
+    # No volumes: with nothing mounted at /app/db, the container writes its
+    # SQLite file into its own ephemeral writable layer. That gives D-03's
+    # isolation for free and guarantees a fresh database on every container
+    # creation.
+    # No ports: the playwright service reaches this over the compose
+    # network by service name; publishing a host port would collide with a
+    # developer's own finally container already bound to 8000.
+    healthcheck:
+      # The runtime base is python:3.12-slim, which has no curl/wget. Use
+      # the image's own venv Python (first on PATH) instead.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+      start_period: 5s
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.62.1-noble
+    depends_on:
+      app:
+        # Plain depends_on only orders container start, not readiness — the
+        # healthcheck condition is what makes this actually wait for the app
+        # to answer /api/health before the suite runs.
+        condition: service_healthy
+    working_dir: /work
+    volumes:
+      - .:/work
+    environment:
+      # The app service's compose DNS name, not localhost — the playwright
+      # container is a separate network namespace; localhost here would
+      # resolve to the playwright container itself.
+      - "BASE_URL=http://app:8000"
+      - "CI=true"
+    command: sh -c "npm ci && npx playwright test"
