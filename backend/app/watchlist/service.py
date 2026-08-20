@@ -11,7 +11,7 @@ import uuid
 from contextlib import closing
 from datetime import UTC, datetime
 
-from app.db.database import DEFAULT_USER_ID, connect
+from app.db.database import DEFAULT_USER_ID, connect, db_path
 
 from .models import DuplicateTickerError, InvalidTickerError, WatchlistFullError
 
@@ -34,29 +34,41 @@ def normalize_ticker(ticker: str) -> str:
 def add_ticker(ticker: str) -> str:
     """Normalize, enforce the soft cap, and insert -- or raise a rejection.
 
-    The `UNIQUE (user_id, ticker)` constraint is the single source of truth
-    for duplication: there is no read-then-write race because the insert
-    itself is what discovers the conflict.
+    The count check and insert run inside one `BEGIN IMMEDIATE` transaction,
+    the same pattern `execute_trade` uses to close the analogous
+    cash-balance race (`app/portfolio/service.py`), so two concurrent adds
+    can't both observe a stale count and push the watchlist past its cap.
+    The `UNIQUE (user_id, ticker)` constraint remains the single source of
+    truth for duplication within that transaction.
     """
     normalized = normalize_ticker(ticker)
 
-    with closing(connect()) as conn:
-        count = conn.execute(
-            "SELECT COUNT(*) AS n FROM watchlist WHERE user_id = ?",
-            (DEFAULT_USER_ID,),
-        ).fetchone()["n"]
-        if count >= MAX_WATCHLIST_TICKERS:
-            raise WatchlistFullError(MAX_WATCHLIST_TICKERS)
-
+    with closing(sqlite3.connect(db_path(), isolation_level=None)) as conn:
+        conn.row_factory = sqlite3.Row
+        began = False
         try:
-            conn.execute(
-                "INSERT OR ABORT INTO watchlist (id, user_id, ticker, added_at) "
-                "VALUES (?, ?, ?, ?)",
-                (uuid.uuid4().hex, DEFAULT_USER_ID, normalized, datetime.now(UTC).isoformat()),
-            )
-        except sqlite3.IntegrityError as error:
-            raise DuplicateTickerError(normalized) from error
-        conn.commit()
+            conn.execute("BEGIN IMMEDIATE")
+            began = True
+            count = conn.execute(
+                "SELECT COUNT(*) AS n FROM watchlist WHERE user_id = ?",
+                (DEFAULT_USER_ID,),
+            ).fetchone()["n"]
+            if count >= MAX_WATCHLIST_TICKERS:
+                raise WatchlistFullError(MAX_WATCHLIST_TICKERS)
+
+            try:
+                conn.execute(
+                    "INSERT OR ABORT INTO watchlist (id, user_id, ticker, added_at) "
+                    "VALUES (?, ?, ?, ?)",
+                    (uuid.uuid4().hex, DEFAULT_USER_ID, normalized, datetime.now(UTC).isoformat()),
+                )
+            except sqlite3.IntegrityError as error:
+                raise DuplicateTickerError(normalized) from error
+            conn.execute("COMMIT")
+        except Exception:
+            if began:
+                conn.execute("ROLLBACK")
+            raise
 
     return normalized
 

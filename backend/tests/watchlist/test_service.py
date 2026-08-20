@@ -1,3 +1,5 @@
+import threading
+
 import pytest
 
 from app.db import database
@@ -56,6 +58,41 @@ class TestAddTicker:
 
         assert len(database.watchlist_tickers()) == MAX_WATCHLIST_TICKERS
         assert "OVER" not in database.watchlist_tickers()
+
+
+class TestConcurrentAddTicker:
+    def test_only_one_of_two_racing_adds_succeeds_at_the_cap(self, tmp_path, monkeypatch):
+        _use_tmp_db(tmp_path, monkeypatch)
+        # Letters-only synthetic tickers -- normalize_ticker rejects digits.
+        synthetic_tickers = [
+            chr(65 + i // 26) + chr(65 + i % 26) for i in range(MAX_WATCHLIST_TICKERS - 1)
+        ]
+        for ticker in synthetic_tickers:
+            add_ticker(ticker)
+
+        results: list[object] = []
+        barrier = threading.Barrier(2)
+
+        def run_add(ticker: str) -> None:
+            barrier.wait()
+            try:
+                results.append(add_ticker(ticker))
+            except WatchlistFullError as error:
+                results.append(error)
+
+        threads = [
+            threading.Thread(target=run_add, args=(ticker,)) for ticker in ("ZY", "ZZ")
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        successes = [r for r in results if not isinstance(r, Exception)]
+        failures = [r for r in results if isinstance(r, WatchlistFullError)]
+        assert len(successes) == 1
+        assert len(failures) == 1
+        assert len(database.watchlist_tickers()) == MAX_WATCHLIST_TICKERS
 
 
 class TestRemoveTicker:
