@@ -35,7 +35,11 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
 # --- Stage 3: runtime ---------------------------------------------------
-FROM python:3.12-slim AS runtime
+# Same image family and tag as backend-builder (not python:3.12-slim, which
+# floats independently) so the venv copied in below is guaranteed to match
+# the Debian release it was built against -- avoids a glibc mismatch if the
+# two tags' underlying releases ever diverge.
+FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim AS runtime
 
 RUN groupadd --system finally && useradd --system --gid finally finally
 
