@@ -42,6 +42,7 @@ decisions:
   - "litellm package legitimacy approved via blocking-human checkpoint (Task 1) before install — PyPI/GitHub cross-checks confirmed BerriAI ownership and multi-year release history"
   - "Persisted actions payload shape (type/status/ticker + trade or watchlist-specific fields) fixed now in models.py docstring so Plans 03/04 build against one contract"
   - "Message length measured in Python string code points (len() on str), matching pydantic's max_length semantics"
+requirements-completed: [CHAT-01, CHAT-06, CHAT-08, CHAT-09, TEST-02]
 metrics:
   duration: "~25 min"
   completed: 2026-08-17
