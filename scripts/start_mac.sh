@@ -14,9 +14,26 @@ CONTAINER_NAME="finally"
 IMAGE_NAME="finally"
 
 BUILD_REQUESTED=false
-if [[ "${1:-}" == "--build" ]]; then
-  BUILD_REQUESTED=true
-fi
+PORT=8000
+while (($#)); do
+  case "$1" in
+    --build)
+      BUILD_REQUESTED=true
+      ;;
+    [0-9]*)
+      if [[ "$1" == *[!0-9]* ]] || ((10#$1 < 1 || 10#$1 > 65535)); then
+        echo "Invalid port: $1 (expected 1-65535)" >&2
+        exit 1
+      fi
+      PORT="$1"
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+  shift
+done
 
 if [ "$BUILD_REQUESTED" = true ] || ! docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
   echo "Building the $IMAGE_NAME image..."
@@ -37,7 +54,7 @@ fi
 
 case "$STATE" in
   running)
-    echo "$CONTAINER_NAME is already running at http://localhost:8000"
+    echo "$CONTAINER_NAME is already running at http://localhost:$PORT"
     ;;
   exited|created)
     docker start "$CONTAINER_NAME" >/dev/null
@@ -45,7 +62,7 @@ case "$STATE" in
     ;;
   absent)
     docker run -d --name "$CONTAINER_NAME" \
-      -p 127.0.0.1:8000:8000 \
+      -p "127.0.0.1:$PORT:8000" \
       -v "$REPO_ROOT/db:/app/db" \
       --env-file "$REPO_ROOT/.env" \
       "$IMAGE_NAME" >/dev/null
@@ -54,14 +71,14 @@ case "$STATE" in
 esac
 
 for i in $(seq 1 30); do
-  if curl -sf http://localhost:8000/api/health >/dev/null 2>&1; then
-    echo "finally is ready at http://localhost:8000"
+  if curl -sf "http://localhost:$PORT/api/health" >/dev/null 2>&1; then
+    echo "finally is ready at http://localhost:$PORT"
     if command -v open >/dev/null 2>&1; then
-      open http://localhost:8000
+      open "http://localhost:$PORT"
     elif command -v xdg-open >/dev/null 2>&1; then
-      xdg-open http://localhost:8000
+      xdg-open "http://localhost:$PORT"
     else
-      echo "Could not find a command to open a browser automatically. Visit http://localhost:8000"
+      echo "Could not find a command to open a browser automatically. Visit http://localhost:$PORT"
     fi
     exit 0
   fi
