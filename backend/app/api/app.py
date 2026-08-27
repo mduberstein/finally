@@ -30,8 +30,12 @@ def create_app() -> FastAPI:
     app.include_router(stream_router)
 
     if STATIC_DIR.exists():
-        app.mount("/_next", StaticFiles(directory=STATIC_DIR / "_next"), name="next")
-        app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+        next_dir = STATIC_DIR / "_next"
+        assets_dir = STATIC_DIR / "assets"
+        if next_dir.exists():
+            app.mount("/_next", StaticFiles(directory=next_dir), name="next")
+        if assets_dir.exists():
+            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
     else:
         # For unit/integration tests before frontend build, mount nothing.
         pass
