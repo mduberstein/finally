@@ -15,7 +15,7 @@ Built entirely by coding agents as a capstone project for an agentic AI coding c
 
 ## Architecture
 
-Single Docker container serving everything on port 8000:
+Single Docker container serving everything on port 8003:
 
 - **Frontend**: Next.js (static export) with TypeScript and Tailwind CSS
 - **Backend**: FastAPI (Python/uv) with SSE streaming
@@ -30,11 +30,12 @@ Single Docker container serving everything on port 8000:
 cp .env.example .env
 # Add your OPENROUTER_API_KEY to .env
 
-# Run with Docker
-docker build -t finally .
-docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally
+# Run with Docker Compose
+./scripts/start_mac.sh
+# or:
+docker compose up --build
 
-# Open http://localhost:8000
+# Open http://localhost:8003
 ```
 
 ## Environment Variables

@@ -1,0 +1,14 @@
+services:
+  finally:
+    build: .
+    container_name: finally
+    ports:
+      - "8003:8003"
+    env_file: .env
+    environment:
+      PORT: 8003
+      FINALLY_STATIC_DIR: /app/static
+      DB_PATH: /app/db/finally.db
+    volumes:
+      - ./db:/app/db
+    restart: unless-stopped

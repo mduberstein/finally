@@ -1,0 +1,22 @@
+services:
+  app:
+    build: ..
+    environment:
+      PORT: 8003
+      LLM_MOCK: true
+      FINALLY_STATIC_DIR: /app/static
+      DB_PATH: /app/db/finally.db
+    volumes:
+      - ../db:/app/db
+    ports:
+      - "8003:8003"
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.48.0-jammy
+    depends_on:
+      - app
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    command: >
+      sh -c "npm init -y >/dev/null 2>&1 && npx -y @playwright/test@latest test"

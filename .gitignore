@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Frontend build/runtime
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Project runtime data
+/db/
+/db/finally.db
