@@ -113,3 +113,27 @@ def test_chat_mock_executes_actions(tmp_path: Path) -> None:
 
         watchlist = _parse_response(client.get("/api/watchlist"))
         assert any(item["ticker"] == "NVDA" for item in watchlist)
+
+
+def test_frontend_static_mount_tolerates_missing_assets_dir(tmp_path: Path) -> None:
+    static_dir = tmp_path / "frontend_out"
+    static_dir.mkdir()
+    (static_dir / "index.html").write_text("<html><body>FinAlly</body></html>")
+    (static_dir / "_next").mkdir()
+
+    os.environ["DB_PATH"] = str(tmp_path / "finally.db")
+    os.environ["FINALLY_STATIC_DIR"] = str(static_dir)
+    os.environ["LLM_MOCK"] = "true"
+    os.environ.pop("OPENROUTER_API_KEY", None)
+    os.environ.pop("MASSIVE_API_KEY", None)
+
+    for module in ("app.config", "app.app_state", "app.main", "app.api.app"):
+        if module in sys.modules:
+            del sys.modules[module]
+
+    from app.main import app  # pylint: disable=import-outside-toplevel
+
+    with TestClient(app) as client:
+        response = client.get("/")
+        assert response.status_code == 200
+        assert "FinAlly" in response.text
