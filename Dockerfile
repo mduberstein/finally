@@ -18,7 +18,7 @@ RUN apt-get update \
 RUN pip install --no-cache-dir uv
 
 WORKDIR /app
-COPY backend/pyproject.toml backend/uv.lock ./
+COPY backend/pyproject.toml backend/uv.lock backend/README.md ./
 RUN uv sync --frozen --no-dev
 
 COPY backend/ ./backend
